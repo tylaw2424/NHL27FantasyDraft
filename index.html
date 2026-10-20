@@ -1,0 +1,1737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Money Moves · NHL 27 Draft</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#060b14; --panel:#0d1524; --panel2:#121d31; --panel3:#18263f; --line:#1f2e48; --line2:#2a3d5e;
+  --txt:#e6eef9; --mut:#7d8fab; --dim:#56677f; --ice:#cfe8ff;
+  --acc:#3ab8ff; --gold:#f5c542; --red:#ff4d5e; --grn:#2fd27a;
+  --pC:#ff9f43; --pLW:#3ab8ff; --pRW:#b18cff; --pD:#2fd27a; --pG:#f5c542;
+  --mono:'JetBrains Mono',ui-monospace,monospace; --cond:'Barlow Condensed',sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.4 Inter,system-ui,sans-serif}
+body{background:radial-gradient(1200px 500px at 50% -200px,#12284a 0%,transparent 70%),var(--bg);min-height:100vh}
+button{font:inherit;cursor:pointer;border:1px solid var(--line2);background:var(--panel3);color:var(--txt);border-radius:7px;padding:6px 11px;transition:background .15s,border-color .15s}
+button:hover:not(:disabled){border-color:var(--acc);background:#1d3152}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.pri{background:var(--acc);border-color:var(--acc);color:#04121f;font-weight:700}
+button.pri:hover:not(:disabled){background:#62c8ff}
+button.danger{border-color:#6b2430;color:#ff8f9a}
+button.danger:hover:not(:disabled){background:#3a141b;border-color:var(--red)}
+button.sm{padding:3px 8px;font-size:12px;border-radius:6px}
+input,select,textarea{font:inherit;background:#0a1220;color:var(--txt);border:1px solid var(--line2);border-radius:7px;padding:6px 9px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--acc)}
+textarea{width:100%;font-family:var(--mono);font-size:12px}
+label{color:var(--mut);font-size:12px}
+.mono{font-family:var(--mono)}
+.mut{color:var(--mut)}
+.hidden{display:none!important}
+
+/* header */
+header{position:sticky;top:0;z-index:20;background:rgba(6,11,20,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.hrow{display:flex;align-items:center;gap:16px;padding:10px 18px;flex-wrap:wrap}
+.brand{font-family:var(--cond);font-weight:800;font-size:24px;letter-spacing:.5px;line-height:1;text-transform:uppercase}
+.brand small{display:block;font-size:12px;color:var(--acc);letter-spacing:2.5px;font-weight:600}
+.clock{flex:1;display:flex;align-items:center;justify-content:center;gap:18px;min-width:300px}
+.clock .who{text-align:right}
+.clock .who .lbl{font-size:11px;letter-spacing:2px;color:var(--mut);text-transform:uppercase}
+.clock .who .tm{font-family:var(--cond);font-size:26px;font-weight:700;line-height:1.05}
+.clock .who .pk{font-size:12px;color:var(--mut)}
+.timer{font-family:var(--mono);font-weight:700;font-size:38px;padding:2px 14px;border-radius:10px;background:#0a1322;border:1px solid var(--line2);min-width:150px;text-align:center}
+.timer.warn{color:var(--gold);border-color:#6a5413}
+.timer.crit{color:var(--red);border-color:#6b2430;animation:pulse 1s infinite}
+.timer.paused{color:var(--mut)}
+@keyframes pulse{50%{opacity:.55}}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:4px 9px;border-radius:99px;border:1px solid var(--line2);color:var(--mut)}
+.chip.live{color:var(--grn);border-color:#1d5a3a}
+.chip.paused{color:var(--gold);border-color:#6a5413}
+.chip.done{color:var(--acc);border-color:#1f4f6e}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--dim)}
+.dot.ok{background:var(--grn);box-shadow:0 0 8px var(--grn)}
+.dot.bad{background:var(--red)}
+.me{display:flex;align-items:center;gap:8px;font-size:12px}
+.cbar{display:flex;gap:6px;flex-wrap:wrap;padding:8px 18px;border-top:1px solid var(--line);background:#0a1120;align-items:center}
+.cbar .tag{font-family:var(--cond);font-weight:700;letter-spacing:1.5px;color:var(--gold);margin-right:6px;font-size:14px}
+.cbar .sep{width:1px;height:22px;background:var(--line2);margin:0 4px}
+.oc-banner{background:linear-gradient(90deg,#0d4a2c,#0f3a5c);text-align:center;padding:7px;font-weight:700;letter-spacing:1px;font-family:var(--cond);font-size:18px}
+
+/* layout */
+.layout{display:grid;grid-template-columns:250px minmax(0,1fr) 310px;gap:14px;padding:14px 18px}
+@media(max-width:1150px){.layout{grid-template-columns:1fr}.side{max-height:none!important}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.card h3{margin:0;padding:11px 14px;font-family:var(--cond);font-size:17px;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.side{max-height:calc(100vh - 150px);position:sticky;top:130px;overflow:auto}
+
+/* up next */
+.un{list-style:none;margin:0;padding:6px}
+.un li{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:8px}
+.un li.cur{background:#11304d;border:1px solid #1f5a86}
+.un li .slot{font-size:10px;letter-spacing:1px;font-weight:700;color:var(--mut);width:52px;text-transform:uppercase}
+.un li.cur .slot{color:var(--grn)}
+.un li .t{flex:1;font-weight:600;font-size:13px}
+.un li .n{font-family:var(--mono);font-size:11px;color:var(--mut)}
+.autob{font-size:10px;font-weight:700;letter-spacing:.8px;padding:2px 6px;border-radius:5px;border:1px solid var(--line2);color:var(--dim);background:transparent}
+.autob.on{color:#04121f;background:var(--gold);border-color:var(--gold)}
+button.autob{cursor:pointer}
+
+/* tabs */
+.tabs{display:flex;gap:2px;overflow-x:auto;padding:8px 8px 0;border-bottom:1px solid var(--line)}
+.tabs button{border:none;background:none;border-radius:8px 8px 0 0;padding:9px 12px;white-space:nowrap;color:var(--mut);font-family:var(--cond);font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.tabs button.on{color:var(--txt);background:var(--panel2);box-shadow:inset 0 -2px 0 var(--acc)}
+.tabs .cnt{font-family:var(--mono);font-size:11px;color:var(--acc);margin-left:4px}
+.tabbody{padding:12px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:8px;overflow:hidden}
+.seg button{border:none;border-radius:0;background:transparent;padding:5px 10px;font-weight:600;font-size:12px;color:var(--mut)}
+.seg button.on{background:var(--acc);color:#04121f}
+
+/* tables */
+.tblwrap{overflow:auto;max-height:calc(100vh - 290px);border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{position:sticky;top:0;background:var(--panel3);z-index:1;text-align:left;font-size:11px;letter-spacing:1px;color:var(--mut);padding:8px 8px;cursor:pointer;user-select:none;white-space:nowrap}
+th.num,td.num{text-align:center}
+th.sorted{color:var(--acc)}
+td{padding:6px 8px;border-top:1px solid var(--line);white-space:nowrap}
+tr:hover td{background:#101b2e}
+tr.taken td{opacity:.38}
+tr.taken td.nm{text-decoration:line-through}
+td.nm{font-weight:600}
+.pos{display:inline-block;min-width:28px;text-align:center;font-size:11px;font-weight:800;padding:2px 5px;border-radius:5px;font-family:var(--mono)}
+.pos-C{background:rgba(255,159,67,.15);color:var(--pC)}
+.pos-LW{background:rgba(58,184,255,.15);color:var(--pLW)}
+.pos-RW{background:rgba(177,140,255,.15);color:var(--pRW)}
+.pos-D{background:rgba(47,210,122,.15);color:var(--pD)}
+.pos-G{background:rgba(245,197,66,.15);color:var(--pG)}
+.v{font-family:var(--mono);font-size:12px}
+.v.t4{color:#fff;font-weight:700}.v.t3{color:var(--ice)}.v.t2{color:#9fb3cf}.v.t1{color:var(--dim)}
+.ovr{font-family:var(--mono);font-weight:700;font-size:13px;padding:2px 6px;border-radius:5px;background:#0a1322}
+.ovr.t4{color:var(--gold)}.ovr.t3{color:#fff}.ovr.t2{color:var(--ice)}.ovr.t1{color:var(--mut)}
+.star{background:none;border:none;color:var(--dim);font-size:16px;padding:0 4px}
+.star.on{color:var(--gold)}
+.star:hover{background:none!important;color:var(--gold)}
+
+/* board */
+.board{overflow:auto;max-height:calc(100vh - 260px);border:1px solid var(--line);border-radius:10px}
+.bgrid{display:grid;gap:3px;padding:3px;min-width:max-content}
+.bh{position:sticky;top:0;z-index:2;background:var(--panel3);font-family:var(--cond);font-weight:700;text-align:center;padding:6px 2px;border-radius:5px;font-size:14px}
+.bh small{display:block;font-family:Inter;font-weight:500;font-size:9px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.br{position:sticky;left:0;z-index:1;background:var(--panel3);font-family:var(--cond);font-weight:700;display:flex;align-items:center;justify-content:center;border-radius:5px;font-size:13px}
+.bc{background:var(--panel2);border-radius:5px;padding:5px 6px;min-height:52px;font-size:11px;border-left:3px solid transparent;overflow:hidden}
+.bc .pn{font-family:var(--mono);font-size:9px;color:var(--dim)}
+.bc .pl{font-weight:600;font-size:11.5px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bc .ps{font-size:10px;color:var(--mut)}
+.bc.cur{background:#11304d;outline:2px solid var(--grn);animation:pulse 1.6s infinite}
+.bc.bpC{border-left-color:var(--pC)}.bc.bpLW{border-left-color:var(--pLW)}.bc.bpRW{border-left-color:var(--pRW)}.bc.bpD{border-left-color:var(--pD)}.bc.bpG{border-left-color:var(--pG)}
+.bc.auto .pl::after{content:' ⚙';color:var(--gold);font-size:9px}
+
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.tcard{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px}
+.tcard.oc{border-color:var(--grn)}
+.tcard .hd{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:6px}
+.tcard .hd b{font-family:var(--cond);font-size:17px}
+.meters{display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap}
+.meter{font-size:10px;font-family:var(--mono);padding:2px 5px;border-radius:4px;background:#0a1322;color:var(--mut)}
+.meter.full{color:var(--grn)}
+.tcard ul{list-style:none;margin:0;padding:0;font-size:12px}
+.tcard li{display:flex;gap:6px;align-items:center;padding:2px 0}
+.tcard li .nm{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* queue */
+.qlist{list-style:none;margin:0;padding:0;max-width:720px}
+.qlist li{display:flex;align-items:center;gap:8px;padding:7px 9px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;margin-bottom:5px}
+.qlist li.drag{opacity:.4}
+.qlist li.over{border-color:var(--acc)}
+.qlist li.gone .nm{text-decoration:line-through;opacity:.45}
+.qlist .grip{cursor:grab;color:var(--dim);font-size:16px;user-select:none;padding:0 2px}
+.qlist .rk{font-family:var(--mono);color:var(--mut);width:22px;text-align:right}
+.qlist .nm{flex:1;font-weight:600}
+.empty{color:var(--mut);padding:24px;text-align:center;border:1px dashed var(--line2);border-radius:10px}
+
+/* pick log */
+.log{list-style:none;margin:0;padding:6px}
+.log li{padding:8px 9px;border-radius:8px;border-bottom:1px solid var(--line)}
+.log li:first-child{background:#0f2238}
+.log .top{display:flex;justify-content:space-between;font-size:11px;color:var(--mut);font-family:var(--mono)}
+.log .mid{display:flex;align-items:center;gap:6px;margin-top:3px}
+.log .mid .nm{font-weight:700;flex:1}
+.log .tm{font-size:12px;color:var(--ice)}
+.log .by{font-size:10px;color:var(--gold)}
+
+/* modals */
+.ov{position:fixed;inset:0;background:rgba(2,6,12,.78);z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
+.modal{background:var(--panel);border:1px solid var(--line2);border-radius:14px;width:100%;max-width:560px;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.modal.wide{max-width:900px}
+.modal h2{margin:0;padding:14px 18px;font-family:var(--cond);letter-spacing:1px;text-transform:uppercase;font-size:22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.modal .bd{padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.modal .ft{padding:12px 18px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.field{display:flex;flex-direction:column;gap:4px}
+.lims{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.lims input{width:100%;text-align:center}
+.note{font-size:12px;color:var(--mut);background:#0a1322;border:1px solid var(--line);border-radius:8px;padding:9px 11px}
+.note.warn{color:var(--gold);border-color:#5a4712}
+.ttbl td{padding:4px 5px}
+.ttbl input{padding:4px 6px;font-size:12px}
+.prizes{display:grid;grid-template-columns:1fr auto;gap:2px 12px;font-size:13px}
+.prizes span:nth-child(even){font-family:var(--mono);text-align:right;color:var(--gold)}
+
+/* login */
+.login{max-width:420px}
+.lopts{display:grid;gap:8px}
+.lopt{text-align:left;padding:12px 14px;border-radius:10px}
+.lopt b{display:block;font-family:var(--cond);font-size:18px;letter-spacing:.5px}
+.lopt span{font-size:12px;color:var(--mut)}
+
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:80;display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none}
+.toast-i{background:var(--panel3);border:1px solid var(--line2);padding:9px 16px;border-radius:9px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.toast-i.err{border-color:var(--red);color:#ffb3bb}
+.toast-i.ok{border-color:var(--grn)}
+.tstats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.tstats div{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 12px}
+.tstats b{display:block;font-family:var(--mono);font-size:22px}
+.tstats span{font-size:11px;color:var(--mut);letter-spacing:.5px;text-transform:uppercase}
+.tstats em{font-style:normal;text-transform:none;color:var(--dim)}
+.tlist{display:flex;flex-direction:column;gap:8px;max-height:calc(100vh - 330px);overflow:auto}
+.trade{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.trade.done{opacity:.5}
+.trh{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.trh b{font-family:var(--cond);font-size:18px}
+.tstep{font-family:var(--mono);font-weight:700;background:var(--acc);color:#04121f;border-radius:6px;padding:1px 8px;font-size:13px}
+.tcols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:700px){.tcols{grid-template-columns:1fr}.tstats{grid-template-columns:repeat(2,1fr)}}
+.tlbl{font-size:11px;letter-spacing:1px;color:var(--mut);text-transform:uppercase;margin-bottom:4px}
+.tcols ul{list-style:none;margin:0;padding:0}
+.tcols li{display:flex;align-items:center;gap:7px;padding:3px 0;font-size:13px}
+.tcols li .nm{flex:1;font-weight:600}
+.tcols li small{display:block;font-weight:400;font-size:11px;color:var(--gold)}
+.cfgwarn{background:#3a141b;color:#ffb3bb;text-align:center;padding:8px;font-weight:600;font-size:13px}
+</style>
+</head>
+<body>
+
+<div id="cfgWarn" class="cfgwarn hidden">Firebase URL not configured — set <code>FIREBASE_URL</code> at the top of the script.</div>
+
+<header>
+  <div class="hrow">
+    <div class="brand">Money Moves<small>NHL 27 Fantasy Draft</small></div>
+    <div class="clock">
+      <div class="who">
+        <div class="lbl" id="clkLbl">On the clock</div>
+        <div class="tm" id="clkTeam">—</div>
+        <div class="pk" id="clkPick"></div>
+      </div>
+      <div class="timer" id="timer">--:--</div>
+    </div>
+    <span class="chip" id="stChip">Not started</span>
+    <div class="me">
+      <span class="dot" id="syncDot" title="Firebase sync"></span>
+      <span id="meLbl" class="mut"></span>
+      <button class="sm" id="btnLogout">Switch</button>
+    </div>
+  </div>
+  <div class="cbar hidden" id="cbar">
+    <span class="tag">COMMISH</span>
+    <button class="pri" id="btnStart">Start Draft</button>
+    <button id="btnPause">Pause</button>
+    <button id="btnUndo">Undo Last Pick</button>
+    <button id="btnAutoNow" title="Auto-pick for the team on the clock right now">Auto-Pick Now</button>
+    <label class="row" style="gap:5px;margin-left:4px"><input type="checkbox" id="chkExpire"> Auto-pick on timer expiry</label>
+    <span class="sep"></span>
+    <button id="btnSettings">Draft Settings</button>
+    <button id="btnTeams">Teams &amp; Order</button>
+    <button id="btnPlayers">Player Pool</button>
+    <button id="btnDiscord">Discord</button>
+    <span class="sep"></span>
+    <button class="danger" id="btnReset">Reset Firebase</button>
+  </div>
+  <div class="oc-banner hidden" id="ocBanner">YOU'RE ON THE CLOCK</div>
+</header>
+
+<div class="layout">
+  <aside class="card side" id="upNextCard">
+    <h3>Up Next <span class="mono mut" style="font-size:12px" id="pickCount"></span></h3>
+    <ul class="un" id="upNext"></ul>
+  </aside>
+
+  <section class="card" style="min-width:0">
+    <div class="tabs" id="tabs">
+      <button data-tab="players" class="on">Players</button>
+      <button data-tab="board">Draft Board</button>
+      <button data-tab="teams">Rosters</button>
+      <button data-tab="queue">Queue<span class="cnt" id="qCnt"></span></button>
+      <button data-tab="trades">Trades</button>
+      <button data-tab="league">League</button>
+    </div>
+    <div class="tabbody" id="tabBody"></div>
+  </section>
+
+  <aside class="card side">
+    <h3>Pick Log <span class="mono mut" style="font-size:12px" id="logCount"></span></h3>
+    <ul class="log" id="pickLog"></ul>
+  </aside>
+</div>
+
+<div id="modalRoot"></div>
+<div id="toast"></div>
+
+<script>
+'use strict';
+/* =====================================================================
+   CONFIG — edit these
+   ===================================================================== */
+const FIREBASE_URL = 'https://money-moves-nhl-default-rtdb.firebaseio.com/';
+const DB_ROOT = 'moneymoves_nhl27';            // all draft state lives here
+const POOL_PATH = DB_ROOT + '_pool';            // player pool kept separate so the 3s poll stays light
+const COMMISH_PASSWORD = 'moneymoves';         // change before sharing the link
+
+const POLL_MS = 3000;
+const WATCHDOG_MS = 1000;
+const TICK_MS = 250;
+const AUTO_DELAY_MS = 3000;          // auto-pick teams pick this long after going on the clock
+const COMMISH_HEARTBEAT_MS = 5000;
+const COMMISH_STALE_MS = 15000;      // if no commish heartbeat for this long, other browsers back up the watchdog
+const FALLBACK_GRACE_MS = 4000;      // extra wait before a non-commish, non-owner browser fires a timer auto-pick
+
+const TEAMS = [
+  ['ANA','Anaheim Ducks'],['BOS','Boston Bruins'],['BUF','Buffalo Sabres'],['CGY','Calgary Flames'],
+  ['CAR','Carolina Hurricanes'],['CHI','Chicago Blackhawks'],['COL','Colorado Avalanche'],['CBJ','Columbus Blue Jackets'],
+  ['DAL','Dallas Stars'],['DET','Detroit Red Wings'],['EDM','Edmonton Oilers'],['FLA','Florida Panthers'],
+  ['LAK','Los Angeles Kings'],['MIN','Minnesota Wild'],['MTL','Montréal Canadiens'],['NSH','Nashville Predators'],
+  ['NJD','New Jersey Devils'],['NYI','New York Islanders'],['NYR','New York Rangers'],['OTT','Ottawa Senators'],
+  ['PHI','Philadelphia Flyers'],['PIT','Pittsburgh Penguins'],['SJS','San Jose Sharks'],['SEA','Seattle Kraken'],
+  ['STL','St. Louis Blues'],['TBL','Tampa Bay Lightning'],['TOR','Toronto Maple Leafs'],['UTA','Utah Mammoth'],
+  ['VAN','Vancouver Canucks'],['VGK','Vegas Golden Knights'],['WSH','Washington Capitals'],['WPG','Winnipeg Jets']
+];
+const TEAM_FULL = Object.fromEntries(TEAMS);
+const TEAM_NAME = Object.fromEntries(TEAMS.map(([a, full]) => [a, ({UTA:'Mammoth', VGK:'Golden Knights', CBJ:'Blue Jackets', DET:'Red Wings', TOR:'Maple Leafs'}[a]) || full.split(' ').slice(-1)[0]]));
+const TEAM_ABBRS = TEAMS.map(t => t[0]);
+const POSITIONS = ['C','LW','RW','D','G'];
+const DEFAULT_LIMITS = {C:2, LW:3, RW:3, D:4, G:2};
+const POS_COLOR_INT = {C:0xff9f43, LW:0x3ab8ff, RW:0xb18cff, D:0x2fd27a, G:0xf5c542};
+const TIMER_OPTIONS = [[0,'No timer'],[30,'30 sec'],[60,'1 min'],[90,'90 sec'],[120,'2 min'],[180,'3 min'],[300,'5 min'],[600,'10 min'],[900,'15 min'],[1800,'30 min'],[3600,'1 hour'],[28800,'8 hours']];
+const PRIZES = [['Playoff Champion',165],['Playoff Runner-up',85],['Silver Cup Champion',50],['Silver Cup Runner-up',25],['16 Playoff Qualifiers × $10',160]];
+// attribute columns: skaters and goalies share column slots so a mixed view lines up
+const SKATER_ATTRS = [['spd','SPD'],['sht','SHT'],['pas','PAS'],['def','DEF'],['phy','PHY']];
+const GOALIE_ATTRS = [['spd','SPD'],['ref','REF'],['hnd','HND'],['gpos','POS'],['reb','REB']];
+
+/* =====================================================================
+   STATE
+   ===================================================================== */
+const FB_BASE = (new URLSearchParams(location.search).get('fb') || FIREBASE_URL).replace(/\/+$/,'');
+const CLIENT_ID = (() => { try { let id = sessionStorage.getItem('mmnhl_cid'); if (!id) { id = Math.random().toString(36).slice(2,10); sessionStorage.setItem('mmnhl_cid', id); } return id; } catch (e) { return Math.random().toString(36).slice(2,10); } })();
+const JITTER_MS = (parseInt(CLIENT_ID, 36) % 5) * 1000;
+
+let S = {config:{}, teams:{}, picks:{}, queues:{}, status:{}, meta:{}, presence:{}, loaded:false};
+let POOL = [];
+let POOL_BY_KEY = new Map();
+let poolVersion;              // undefined until first load
+let clockOffset = 0;
+
+let ROLE = loadRole();
+let UI = {tab:'players', pos:'ALL', search:'', hideDrafted:true, fitsOnly:false, sortKey:'ovr', sortDir:-1, boardView:'grid', viewTeam:''};
+
+// --- auto-pick guards (carried over from MLB build) ---
+let _smartPickRunning = false;   // re-entry guard for doSmartAutopick
+let _autoPickFiring = false;     // watchdog in-flight flag
+
+let _polling = false;
+let _queueDirtyUntil = 0, _queueDirtyTeam = null;
+let _dragging = false;
+let _lastSig = '';
+let _lastPickCount = -1;
+
+/* =====================================================================
+   HELPERS
+   ===================================================================== */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const key = s => String(s ?? '').trim().toLowerCase();
+const serverNow = () => Date.now() + clockOffset;
+const tier = v => v >= 90 ? 't4' : v >= 85 ? 't3' : v >= 78 ? 't2' : 't1';
+const posTag = p => `<span class="pos pos-${esc(p)}">${esc(p)}</span>`;
+
+function loadRole() {
+  try { const r = JSON.parse(localStorage.getItem('mmnhl_role') || 'null'); if (r && r.type) return r; } catch (e) {}
+  return null;
+}
+function saveRole(r) { ROLE = r; try { localStorage.setItem('mmnhl_role', JSON.stringify(r)); } catch (e) {} }
+
+function toast(msg, kind = '') {
+  const el = document.createElement('div');
+  el.className = 'toast-i ' + kind; el.textContent = msg;
+  $('toast').appendChild(el);
+  setTimeout(() => el.remove(), kind === 'err' ? 5000 : 3000);
+}
+
+function fmtTime(ms) {
+  if (ms == null) return '--:--';
+  const s = Math.max(0, Math.ceil(ms / 1000));
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), x = s % 60;
+  return h ? `${h}:${String(m).padStart(2,'0')}:${String(x).padStart(2,'0')}` : `${m}:${String(x).padStart(2,'0')}`;
+}
+
+/* =====================================================================
+   FIREBASE (REST) — all state saves are PATCH
+   ===================================================================== */
+const fbUrl = path => `${FB_BASE}/${path}.json`;
+
+async function fbGet(path) {
+  const r = await fetch(fbUrl(path), {cache:'no-store'});
+  if (!r.ok) throw new Error(`Firebase GET ${r.status}`);
+  return r.json();
+}
+async function fbGetWithEtag(path) {
+  const r = await fetch(fbUrl(path), {cache:'no-store', headers:{'X-Firebase-ETag':'true'}});
+  if (!r.ok) throw new Error(`Firebase GET ${r.status}`);
+  return {data: await r.json(), etag: r.headers.get('ETag')};
+}
+// Multi-path PATCH: keys like "status/paused" update only that leaf — never clobbers queues
+async function fbPatch(updates, path = DB_ROOT) {
+  const r = await fetch(fbUrl(path), {method:'PATCH', body: JSON.stringify(updates)});
+  if (!r.ok) throw new Error(`Firebase PATCH ${r.status}`);
+  return r.json();
+}
+// Conditional write on ONE empty pick slot (picks/N). Returns true (we won), false (someone else did),
+// or null (ETag not available in this browser — caller falls back to a plain PATCH).
+async function fbClaimPickSlot(n, rec) {
+  let etag = null;
+  try {
+    const res = await fbGetWithEtag(`${DB_ROOT}/picks/${n}`);
+    if (res.data) return false;
+    etag = res.etag;
+  } catch (e) { return null; }
+  if (!etag) return null;
+  try {
+    const r = await fetch(fbUrl(`${DB_ROOT}/picks/${n}`), {method:'PUT', headers:{'if-match': etag}, body: JSON.stringify(rec)});
+    if (r.status === 412) return false;
+    if (!r.ok) return null;
+    return true;
+  } catch (e) { return null; }
+}
+
+async function syncClock() {
+  try {
+    const t0 = Date.now();
+    await fbPatch({[`presence/probe_${CLIENT_ID}`]: {'.sv':'timestamp'}});
+    const t1 = Date.now();
+    const v = await fbGet(`${DB_ROOT}/presence/probe_${CLIENT_ID}`);
+    if (typeof v === 'number') clockOffset = v - (t0 + t1) / 2;
+    fbPatch({[`presence/probe_${CLIENT_ID}`]: null}).catch(() => {});
+  } catch (e) { /* keep local clock */ }
+}
+
+function normPicks(p) {
+  const o = {};
+  if (!p) return o;
+  if (Array.isArray(p)) p.forEach((v, i) => { if (v) o[i] = v; });
+  else for (const k in p) if (p[k]) o[+k] = p[k];
+  return o;
+}
+function normQueues(q) {
+  const o = {};
+  if (!q) return o;
+  for (const k in q) {
+    const v = q[k];
+    o[k] = (Array.isArray(v) ? v : (v && typeof v === 'object' ? Object.values(v) : [])).filter(x => typeof x === 'string' && x);
+  }
+  return o;
+}
+
+function applyState(d) {
+  d = d || {};
+  const keepQ = (_queueDirtyTeam && Date.now() < _queueDirtyUntil) ? S.queues[_queueDirtyTeam] : null;
+  S.config = d.config || {};
+  S.teams = d.teams || {};
+  S.picks = normPicks(d.picks);
+  S.status = d.status || {};
+  S.meta = d.meta || {};
+  S.presence = d.presence || {};
+  S.queues = normQueues(d.queues);
+  S.tradeDone = d.tradeDone || {};
+  if (keepQ) S.queues[_queueDirtyTeam] = keepQ;
+  S.loaded = true;
+}
+
+async function loadPool() {
+  const data = await fbGet(POOL_PATH);
+  const arr = data && data.players ? (Array.isArray(data.players) ? data.players : Object.values(data.players)) : [];
+  setPool(arr.filter(Boolean));
+  poolVersion = S.meta.poolVersion || null;
+}
+function setPool(arr) {
+  POOL = arr;
+  POOL_BY_KEY = new Map(arr.map(p => [key(p.name), p]));
+}
+
+async function pollFirebase() {
+  if (_polling) return;
+  _polling = true;
+  try {
+    const data = await fbGet(DB_ROOT);
+    applyState(data);
+    if ((S.meta.poolVersion || null) !== poolVersion) await loadPool();
+    setSync(true);
+    render();
+  } catch (e) {
+    setSync(false);
+  } finally {
+    _polling = false;
+  }
+}
+function setSync(ok) { const d = $('syncDot'); d.className = 'dot ' + (ok ? 'ok' : 'bad'); d.title = ok ? 'Synced with Firebase' : 'Firebase unreachable'; }
+
+/* =====================================================================
+   DRAFT MATH
+   ===================================================================== */
+function cfg() {
+  const c = S.config || {};
+  const limits = Object.assign({}, DEFAULT_LIMITS, c.limits || {});
+  for (const p of POSITIONS) limits[p] = Math.max(0, parseInt(limits[p], 10) || 0);
+  let order = Array.isArray(c.order) ? c.order.filter(a => TEAM_NAME[a]) : [];
+  if (order.length !== TEAM_ABBRS.length || new Set(order).size !== order.length) order = TEAM_ABBRS.slice();
+  const rosterSize = POSITIONS.reduce((s, p) => s + limits[p], 0);
+  const ts = parseInt(c.timerSecs, 10);
+  return {
+    draftType: c.draftType === 'linear' ? 'linear' : 'snake',
+    timerSecs: Number.isFinite(ts) && ts >= 0 ? ts : 120,
+    rounds: parseInt(c.rounds, 10) > 0 ? parseInt(c.rounds, 10) : rosterSize,
+    limits, order, rosterSize,
+    autoPickOnExpire: c.autoPickOnExpire !== false,
+    discordWebhook: c.discordWebhook || '',
+    discordEnabled: !!c.discordEnabled,
+    discordMentions: c.discordMentions !== false,
+  };
+}
+function team(abbr) {
+  return Object.assign({fee: 0, pin: '', discordId: '', autoPick: false}, S.teams[abbr] || {}, {name: TEAM_NAME[abbr] || abbr});
+}
+const timerMs = () => cfg().timerSecs * 1000;
+const totalPicks = () => { const c = cfg(); return c.rounds * c.order.length; };
+function teamForPick(n) {
+  const c = cfg(), N = c.order.length;
+  const r = Math.floor(n / N);
+  let i = n % N;
+  if (c.draftType === 'snake' && r % 2 === 1) i = N - 1 - i;
+  return c.order[i];
+}
+function pickLabel(n) { const N = cfg().order.length; return `R${Math.floor(n / N) + 1}.${(n % N) + 1}`; }
+function currentPick() { const T = totalPicks(); for (let n = 0; n < T; n++) if (!S.picks[n]) return n; return T; }
+const isComplete = () => currentPick() >= totalPicks();
+function draftedKeys() { return new Set(Object.values(S.picks).map(p => key(p.name))); }
+const isDrafted = name => draftedKeys().has(key(name));
+function teamPicks(abbr) { return Object.keys(S.picks).map(Number).sort((a, b) => a - b).map(n => S.picks[n]).filter(p => p.team === abbr); }
+function teamCounts(abbr) { const c = {}; for (const p of teamPicks(abbr)) c[p.pos] = (c[p.pos] || 0) + 1; return c; }
+
+function normPos(s) {
+  const t = String(s || '').toUpperCase().trim();
+  if (['C','LW','RW','D','G'].includes(t)) return t;
+  if (t === 'L' || t === 'LEFT WING') return 'LW';
+  if (t === 'R' || t === 'RIGHT WING') return 'RW';
+  if (['LD','RD','DEF','DEFENSE','DEFENCE','DEFENSEMAN','DEFENCEMAN'].includes(t)) return 'D';
+  if (['GK','GOALIE','GOALTENDER'].includes(t)) return 'G';
+  if (t === 'CENTER' || t === 'CENTRE') return 'C';
+  return '';
+}
+function playerPositions(p) {
+  const out = [];
+  for (const s of String(p.pos || '').split(/[\/,|\s]+/)) { const x = normPos(s); if (x && !out.includes(x)) out.push(x); }
+  return out;
+}
+const isGoalie = p => playerPositions(p)[0] === 'G';
+function openSlotFor(abbr, p) {
+  const lim = cfg().limits, cnt = teamCounts(abbr);
+  for (const pos of playerPositions(p)) if ((cnt[pos] || 0) < (lim[pos] || 0)) return pos;
+  return null;
+}
+
+/* Auto-pick choice: team queue first (in order), then best available OVR that fits an open roster slot */
+function chooseAutoPick(abbr) {
+  const taken = draftedKeys();
+  for (const nm of getQueue(abbr)) {
+    const p = POOL_BY_KEY.get(key(nm));
+    if (!p || taken.has(key(p.name))) continue;
+    const slot = openSlotFor(abbr, p);
+    if (slot) return {p, slot, src:'queue'};
+  }
+  const avail = POOL.filter(p => !taken.has(key(p.name))).sort((a, b) => (+b.ovr || 0) - (+a.ovr || 0));
+  for (const p of avail) { const slot = openSlotFor(abbr, p); if (slot) return {p, slot, src:'bpa'}; }
+  // every cap full (rounds > roster size): plain best available
+  if (avail[0]) return {p: avail[0], slot: playerPositions(avail[0])[0] || 'C', src:'overflow'};
+  return null;
+}
+
+/* Timer derivation. status.timerPick tells us which pick the stored timer belongs to;
+   if it's stale we fall back to the previous pick's timestamp. */
+function lastPickTs(n) { const p = S.picks[n - 1]; return p && typeof p.ts === 'number' ? p.ts : 0; }
+function clockStartFor(n) {
+  const st = S.status;
+  if (st.timerPick === n && st.clockStart) return st.clockStart;
+  return lastPickTs(n) || st.clockStart || serverNow();
+}
+function timerEndFor(n) {
+  const st = S.status;
+  if (st.timerPick === n && st.timerEnd) return st.timerEnd;
+  return clockStartFor(n) + timerMs();
+}
+function remainingMs() {
+  const st = S.status;
+  if (!st.started || isComplete() || cfg().timerSecs === 0) return null;
+  if (st.paused) return st.pausedRemaining ?? timerMs();
+  return Math.max(0, timerEndFor(currentPick()) - serverNow());
+}
+function freshTimerPatch(n) {
+  const now = serverNow();
+  return {'status/timerPick': n, 'status/clockStart': now, 'status/timerEnd': now + timerMs()};
+}
+
+/* =====================================================================
+   PICKS
+   ===================================================================== */
+async function commitPick(n, abbr, player, slot, by) {
+  const fresh = await fbGet(DB_ROOT);
+  applyState(fresh);
+  if (currentPick() !== n) throw new Error('That pick was already made — board refreshed.');
+  if (teamForPick(n) !== abbr) throw new Error('Draft order changed — board refreshed.');
+  if (isDrafted(player.name)) throw new Error(`${player.name} is already drafted.`);
+
+  const N = cfg().order.length;
+  const rec = {n, round: Math.floor(n / N) + 1, team: abbr, name: player.name, pos: slot,
+               ovr: +player.ovr || 0, nhlTeam: player.team || '', by, ts: {'.sv':'timestamp'}};
+
+  const claimed = await fbClaimPickSlot(n, rec);
+  if (claimed === false) throw new Error('Another browser made this pick first.');
+
+  const next = n + 1;
+  const upd = Object.assign({}, freshTimerPatch(next), {'status/complete': next >= totalPicks()});
+  if (S.status.paused) upd['status/pausedRemaining'] = timerMs();
+  if (claimed !== true) upd[`picks/${n}`] = rec;
+  await fbPatch(upd);
+
+  S.picks[n] = Object.assign({}, rec, {ts: serverNow()});
+  Object.assign(S.status, {timerPick: next, clockStart: upd['status/clockStart'], timerEnd: upd['status/timerEnd'], complete: next >= totalPicks()});
+
+  // tidy the picking team's own queue only when this browser owns it
+  const myQ = myQueueTeam();
+  if (myQ === abbr && getQueue(abbr).some(x => key(x) === key(player.name))) {
+    saveQueue(abbr, getQueue(abbr).filter(x => key(x) !== key(player.name)));
+  }
+  render(true);
+  postPickToDiscord(n, false);
+  if (next >= totalPicks()) discordPost({content: '🏁 **The Money Moves NHL 27 draft is complete!**'});
+  return rec;
+}
+
+async function makeManualPick(name) {
+  const p = POOL_BY_KEY.get(key(name));
+  if (!p) return toast('Player not found', 'err');
+  if (!canPickNow()) return toast("It's not your pick", 'err');
+  const n = currentPick(), abbr = teamForPick(n), t = team(abbr);
+  let slot = openSlotFor(abbr, p);
+  if (!slot) {
+    if (ROLE.type !== 'commish') return toast(`${t.name} has no open ${playerPositions(p).join('/')} slot`, 'err');
+    if (!confirm(`${t.name} is at the ${playerPositions(p).join('/')} cap. Override and draft anyway?`)) return;
+    slot = playerPositions(p)[0] || 'C';
+  }
+  if (!confirm(`Draft ${p.name} (${slot} · ${p.ovr} OVR) for ${t.name}?`)) return;
+  try {
+    await commitPick(n, abbr, p, slot, ROLE.type === 'commish' ? 'commish' : 'manager');
+    toast(`${t.name} select ${p.name}`, 'ok');
+  } catch (e) {
+    toast(e.message, 'err');
+    await pollFirebase();
+  }
+}
+
+function canPickNow() {
+  if (!ROLE || !S.status.started || isComplete()) return false;
+  if (ROLE.type === 'commish') return true;
+  if (S.status.paused) return false;
+  return ROLE.type === 'manager' && ROLE.team === teamForPick(currentPick());
+}
+
+/* ---------------- Auto-pick ---------------- */
+async function doSmartAutopick(n, reason) {
+  if (_smartPickRunning) return false;
+  _smartPickRunning = true;
+  try {
+    const fresh = await fbGet(DB_ROOT);
+    applyState(fresh);
+    if (!_smartPickRunning) return false;                 // auto-pick toggled off mid-flight
+    if (currentPick() !== n || isComplete()) return false;
+    const st = S.status;
+    if (!st.started || (st.paused && reason !== 'commish')) return false;
+    const abbr = teamForPick(n), c = cfg();
+    const valid = reason === 'commish'
+      || (reason === 'auto' && team(abbr).autoPick)
+      || (reason === 'timer' && c.timerSecs > 0 && c.autoPickOnExpire && serverNow() >= timerEndFor(n));
+    if (!valid) return false;
+    const choice = chooseAutoPick(abbr);
+    if (!choice) { toast('No eligible players left', 'err'); return false; }
+    const by = reason === 'timer' ? 'auto-timer' : reason === 'commish' ? 'auto-commish' : 'auto';
+    await commitPick(n, abbr, choice.p, choice.slot, by);
+    return true;
+  } catch (e) {
+    console.warn('autopick', e.message);
+    return false;
+  } finally {
+    _smartPickRunning = false;
+  }
+}
+
+/* Who runs timer auto-picks: commissioner's browser first; if no commish heartbeat,
+   the on-the-clock manager's browser; failing that, anyone after a grace period. */
+function amWatchdogLeader(dueAt) {
+  if (!ROLE) return false;
+  if (ROLE.type === 'commish') return true;
+  const hb = S.presence && typeof S.presence.commish === 'number' ? S.presence.commish : 0;
+  if (serverNow() - hb < COMMISH_STALE_MS) return false;
+  if (ROLE.type === 'manager' && ROLE.team === teamForPick(currentPick())) return true;
+  return serverNow() >= dueAt + FALLBACK_GRACE_MS + JITTER_MS;
+}
+
+/* WATCHDOG — single source of truth for timer-expiry and auto-team picks */
+async function runWatchdog() {
+  if (!S.loaded || !POOL.length) return;
+  const st = S.status;
+  if (!st.started || st.paused || isComplete()) return;
+  if (_autoPickFiring || _smartPickRunning) return;
+  const c = cfg(), n = currentPick(), abbr = teamForPick(n), now = serverNow();
+  let reason = null, dueAt = 0;
+  const autoDue = clockStartFor(n) + AUTO_DELAY_MS;
+  const expDue = timerEndFor(n);
+  if (team(abbr).autoPick && now >= autoDue) { reason = 'auto'; dueAt = autoDue; }
+  else if (c.timerSecs > 0 && c.autoPickOnExpire && now >= expDue) { reason = 'timer'; dueAt = expDue; }
+  if (!reason || !amWatchdogLeader(dueAt)) return;
+  _autoPickFiring = true;
+  try { await doSmartAutopick(n, reason); }
+  finally { _autoPickFiring = false; }
+}
+function watchdog() { runWatchdog().catch(e => console.warn('watchdog', e)); }
+
+/* tickTimer — DISPLAY ONLY. Never fires picks. */
+function tickTimer() {
+  const el = $('timer');
+  const ms = remainingMs();
+  const st = S.status;
+  el.className = 'timer';
+  if (!st.started || isComplete()) { el.textContent = isComplete() && st.started ? 'DONE' : '--:--'; return; }
+  if (cfg().timerSecs === 0) { el.textContent = st.paused ? 'PAUSED' : '∞'; if (st.paused) el.classList.add('paused'); return; }
+  el.textContent = fmtTime(ms);
+  if (st.paused) el.classList.add('paused');
+  else if (ms <= 10000) el.classList.add('crit');
+  else if (ms <= 30000) el.classList.add('warn');
+}
+
+async function setTeamAuto(abbr, on) {
+  if (!on) { _autoPickFiring = false; _smartPickRunning = false; }   // stop any in-flight auto-pick immediately
+  S.teams[abbr] = Object.assign({}, S.teams[abbr] || {}, {autoPick: on});
+  render(true);
+  try { await fbPatch({[`teams/${abbr}/autoPick`]: on}); toast(`${team(abbr).name}: auto-pick ${on ? 'ON' : 'OFF'}`); }
+  catch (e) { toast('Save failed: ' + e.message, 'err'); }
+}
+async function setExpireAuto(on) {
+  if (!on) { _autoPickFiring = false; _smartPickRunning = false; }
+  S.config.autoPickOnExpire = on;
+  render(true);
+  try { await fbPatch({'config/autoPickOnExpire': on}); } catch (e) { toast('Save failed', 'err'); }
+}
+
+/* ---------------- Commissioner actions ---------------- */
+async function startDraft() {
+  if (!POOL.length) return toast('Load a player pool first (Player Pool button).', 'err');
+  if (S.status.started) return toast('Draft already started');
+  if (!confirm('Start the draft now?')) return;
+  const n = currentPick();
+  await fbPatch(Object.assign({'status/started': true, 'status/paused': false, 'status/complete': false, 'status/startedAt': serverNow()}, freshTimerPatch(n)));
+  await pollFirebase();
+  const c = cfg();
+  discordPost({content: `🏒 **The Money Moves NHL 27 draft is LIVE!** ${c.draftType === 'snake' ? 'Snake' : 'Linear'} · ${c.rounds} rounds · ${c.timerSecs ? fmtTime(c.timerSecs * 1000) + ' clock' : 'no clock'}\n${pingLine(n)}`,
+               embeds: [upcomingEmbed(n)], allowed_mentions: {parse: ['users']}});
+}
+async function togglePause() {
+  const st = S.status;
+  if (!st.started) return;
+  if (!st.paused) {
+    const rem = Math.max(0, timerEndFor(currentPick()) - serverNow());
+    await fbPatch({'status/paused': true, 'status/pausedRemaining': rem});
+    discordPost({content: '⏸️ Draft paused by the commissioner.'});
+  } else {
+    // unpause: fresh full timer for the team on the clock
+    _autoPickFiring = false;
+    await fbPatch(Object.assign({'status/paused': false, 'status/pausedRemaining': null}, freshTimerPatch(currentPick())));
+    discordPost({content: '▶️ Draft resumed.\n' + pingLine(currentPick()), embeds: [upcomingEmbed(currentPick())], allowed_mentions: {parse: ['users']}});
+  }
+  await pollFirebase();
+}
+async function undoLastPick() {
+  await pollFirebase();
+  const n = currentPick() - 1;
+  if (n < 0 || !S.picks[n]) return toast('No picks to undo');
+  const p = S.picks[n];
+  if (!confirm(`Undo ${pickLabel(n)}: ${team(p.team).name} — ${p.name}?`)) return;
+  _autoPickFiring = false;
+  const upd = Object.assign({[`picks/${n}`]: null, 'status/complete': false}, freshTimerPatch(n));
+  if (S.status.paused) upd['status/pausedRemaining'] = timerMs();
+  await fbPatch(upd);
+  await pollFirebase();
+  toast(`Undid ${p.name}`);
+  discordPost({content: `↩️ ${pickLabel(n)} (${p.name} to ${team(p.team).name}) was undone. ${team(p.team).name} is back on the clock.`});
+}
+async function autoPickNow() {
+  if (!S.status.started || isComplete()) return;
+  const n = currentPick();
+  if (!confirm(`Auto-pick for ${team(teamForPick(n)).name} now?`)) return;
+  const ok = await doSmartAutopick(n, 'commish');
+  if (!ok) toast('Auto-pick did not complete', 'err');
+}
+
+/* =====================================================================
+   QUEUE (names, never indexes)
+   ===================================================================== */
+function getQueue(abbr) { return (S.queues[abbr] || []).filter(Boolean); }
+function myQueueTeam() {
+  if (!ROLE) return null;
+  if (ROLE.type === 'manager') return ROLE.team;
+  if (ROLE.type === 'commish') return UI.viewTeam || teamForPick(Math.min(currentPick(), totalPicks() - 1));
+  return null;
+}
+async function saveQueue(abbr, arr) {
+  const clean = [];
+  for (const n of arr) if (n && !clean.some(x => key(x) === key(n))) clean.push(n);
+  S.queues[abbr] = clean;
+  _queueDirtyTeam = abbr; _queueDirtyUntil = Date.now() + 6000;
+  render(true);
+  try { await fbPatch({[`queues/${abbr}`]: clean.length ? clean : null}); }
+  catch (e) { toast('Queue save failed', 'err'); }
+}
+function toggleQueue(name) {
+  const abbr = myQueueTeam(); if (!abbr) return;
+  const q = getQueue(abbr);
+  if (q.some(x => key(x) === key(name))) saveQueue(abbr, q.filter(x => key(x) !== key(name)));
+  else saveQueue(abbr, q.concat([name]));
+}
+
+/* =====================================================================
+   DISCORD
+   ===================================================================== */
+async function discordPost(payload, force = false) {
+  const c = cfg();
+  if ((!c.discordEnabled && !force) || !c.discordWebhook) return false;
+  try {
+    const r = await fetch(c.discordWebhook, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+    if (!r.ok) console.warn('Discord', r.status);
+    return r.ok;
+  } catch (e) { console.warn('Discord', e); return false; }
+}
+function mentionFor(abbr) {
+  const c = cfg(), id = String(team(abbr).discordId || '').replace(/\D/g, '');
+  return c.discordMentions && id ? `<@${id}>` : '';
+}
+function upcomingValue(k) {
+  if (k >= totalPicks()) return '—';
+  const a = teamForPick(k);
+  return `**${team(a).name}** · ${pickLabel(k)}`;
+}
+// Pings only fire from message content (not embeds). Clock gets its own line;
+// deck/hole/2nd hole go on a smaller Discord subtext line (-#) underneath.
+function pingLine(k) {
+  const T = totalPicks(), lines = [];
+  const clock = k < T ? mentionFor(teamForPick(k)) : '';
+  if (clock) lines.push(`${clock} you're on the clock!`);
+  const labels = ['Deck', 'Hole', '2nd hole'], parts = [];
+  for (let i = 1; i <= 3 && k + i < T; i++) {
+    const m = mentionFor(teamForPick(k + i));
+    if (m) parts.push(`${labels[i - 1]} ${m}`);
+  }
+  if (parts.length) lines.push('-# ' + parts.join(' · '));
+  return lines.join('\n');
+}
+function upcomingChain(k) {
+  const out = [];
+  for (let i = k; i < Math.min(totalPicks(), k + 3); i++) out.push(`${team(teamForPick(i)).name} (${pickLabel(i)})`);
+  return out.join(' → ') || '—';
+}
+// Left: team on the clock. Right: On Deck → In the Hole → 2nd in the Hole as one string.
+function upcomingEmbed(k) {
+  return {color: 0x3ab8ff, fields: [
+    {name: '🚨 On the Clock', value: upcomingValue(k), inline: true},
+    {name: 'On Deck → In the Hole → 2nd in the Hole', value: upcomingChain(k + 1), inline: true}]};
+}
+function attrLine(p) {
+  const attrs = isGoalie(p) ? GOALIE_ATTRS : SKATER_ATTRS;
+  return attrs.filter(([k]) => p[k] != null && p[k] !== '').map(([k, l]) => `${l} ${p[k]}`).join(' · ');
+}
+async function postPickToDiscord(n, repost) {
+  const p = S.picks[n]; if (!p) return false;
+  const nextAbbr = n + 1 < totalPicks() ? teamForPick(n + 1) : null;
+  const emb = upcomingEmbed(n + 1);
+  const payload = {
+    content: (repost ? '🔁 ' : '') + (nextAbbr ? pingLine(n + 1) : '🏁 That was the final pick!'),
+    allowed_mentions: {parse: ['users']},
+    embeds: [{
+      title: pickLabel(n),
+      description: `**${team(p.team).name}** select **${p.name}**\n${p.pos} · ${p.ovr} OVR${p.nhlTeam ? ' · ' + p.nhlTeam : ''}${String(p.by || '').startsWith('auto') ? '\n_Auto-pick_' : ''}`,
+      color: POS_COLOR_INT[p.pos] || 0x3ab8ff,
+      fields: emb.fields,
+      footer: {text: 'Money Moves · NHL 27 Draft'},
+      timestamp: new Date(typeof p.ts === 'number' ? p.ts : Date.now()).toISOString()
+    }]
+  };
+  if (!payload.content) delete payload.content;
+  return discordPost(payload, repost);
+}
+
+/* =====================================================================
+   TRADE SCRIPT — turns the finished draft into in-game trades
+   Rules: one trade = up to 5 players each way between two NHL teams;
+   the other side may send 0–5 back. Goal: fewest transactions.
+   1) Direct plan: each pair of teams gets max(ceil(A→B/5), ceil(B→A/5)) trades.
+   2) Routing pass (optional): a small trade is removed when every player in it
+      can ride along in two trades that already exist and have open slots
+      (A→X then X→B). Execution order respects those two-step moves.
+   ===================================================================== */
+const TEAM_ALIAS = (() => {
+  const m = new Map(), seen = new Map();
+  const norm = s => key(s).normalize('NFD').replace(/[̀-ͯ]/g, '');
+  const add = (k, a) => { const n = norm(k); if (!n) return; if (seen.has(n) && seen.get(n) !== a) { m.delete(n); return; } seen.set(n, a); m.set(n, a); };
+  for (const [a, full] of TEAMS) {
+    add(a, a); add(full, a); add(TEAM_NAME[a], a);
+    add(full.slice(0, full.length - TEAM_NAME[a].length).trim(), a);   // city (New York is dropped as ambiguous)
+  }
+  const extra = {LA:'LAK', NJ:'NJD', SJ:'SJS', TB:'TBL', VEG:'VGK', LV:'VGK', WAS:'WSH', MON:'MTL', CLB:'CBJ', NAS:'NSH', CAL:'CGY', UTAH:'UTA', UHC:'UTA', WIN:'WPG', ANH:'ANA', ARI:'UTA'};
+  for (const k in extra) add(k, extra[k]);
+  return {get: s => m.get(norm(s)) || null};
+})();
+const nhlAbbr = s => TEAM_ALIAS.get(s);
+
+function tradeSig(t) {
+  const names = [...t.ab, ...t.ba].map(m => `${m.name}:${m.hop}`).sort().join(',');
+  let h = 5381; const str = `${t.a}|${t.b}|${names}`;
+  for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) >>> 0;
+  return `${t.a}${t.b}_${h.toString(36)}`;
+}
+
+function buildTradePlan(route = true) {
+  const moves = [], stay = [], unknown = [];
+  for (const n of Object.keys(S.picks).map(Number).sort((a, b) => a - b)) {
+    const p = S.picks[n];
+    const pl = POOL_BY_KEY.get(key(p.name));
+    const from = nhlAbbr(p.nhlTeam || (pl && pl.team) || '');
+    const rec = {name: p.name, pos: p.pos, ovr: +p.ovr || 0, to: p.team, from, n};
+    if (!from) unknown.push(rec); else if (from === p.team) stay.push(rec); else moves.push(rec);
+  }
+  const byOvr = (x, y) => y.ovr - x.ovr || x.name.localeCompare(y.name);
+  const byPair = new Map();
+  for (const m of moves) {
+    const [a, b] = [m.from, m.to].sort();
+    const k = a + '|' + b;
+    if (!byPair.has(k)) byPair.set(k, {a, b, ab: [], ba: []});
+    const g = byPair.get(k);
+    (m.from === a ? g.ab : g.ba).push(m);
+  }
+  let trades = [], nextId = 0;
+  for (const k of [...byPair.keys()].sort()) {
+    const g = byPair.get(k);
+    g.ab.sort(byOvr); g.ba.sort(byOvr);
+    const cnt = Math.max(Math.ceil(g.ab.length / 5), Math.ceil(g.ba.length / 5));
+    for (let i = 0; i < cnt; i++) trades.push({id: nextId++, a: g.a, b: g.b,
+      ab: g.ab.slice(i * 5, i * 5 + 5).map(m => Object.assign({}, m, {hop: 0})),
+      ba: g.ba.slice(i * 5, i * 5 + 5).map(m => Object.assign({}, m, {hop: 0})), pinned: false, dead: false});
+  }
+  const directCount = trades.length;
+
+  const deps = new Map();                                   // id -> Map(id -> count): key must run before value
+  const addDep = (x, y, d = 1) => { if (!deps.has(x)) deps.set(x, new Map()); const mm = deps.get(x); const v = (mm.get(y) || 0) + d; if (v > 0) mm.set(y, v); else mm.delete(y); };
+  const reach = (src, dst) => { const st = [src], seen = new Set(); while (st.length) { const x = st.pop(); if (x === dst) return true; if (seen.has(x)) continue; seen.add(x); for (const y of (deps.get(x) || new Map()).keys()) st.push(y); } return false; };
+  const sideOf = (t, from) => from === t.a ? t.ab : t.ba;
+  const carrier = (from, to) => trades.find(t => !t.dead && ((t.a === from && t.b === to) || (t.a === to && t.b === from)) && sideOf(t, from).length < 5);
+
+  if (route) {
+    const order = trades.slice().sort((x, y) => (x.ab.length + x.ba.length) - (y.ab.length + y.ba.length) || x.id - y.id);
+    for (const t of order) {
+      if (t.pinned || t.dead) continue;
+      const players = [...t.ab.map(m => [m, t.a, t.b]), ...t.ba.map(m => [m, t.b, t.a])];
+      t.dead = true;
+      const plan = [];
+      let ok = true;
+      for (const [m, from, to] of players) {
+        let placed = false;
+        for (const X of TEAM_ABBRS) {
+          if (X === from || X === to) continue;
+          const l1 = carrier(from, X); if (!l1) continue;
+          const l2 = carrier(X, to); if (!l2 || l2 === l1) continue;
+          if (reach(l2.id, l1.id)) continue;               // would make the order impossible
+          const e1 = Object.assign({}, m, {hop: 1, via: X}), e2 = Object.assign({}, m, {hop: 2, via: X});
+          sideOf(l1, from).push(e1); sideOf(l2, X).push(e2); addDep(l1.id, l2.id);
+          e1.next = l2; e2.prev = l1;
+          plan.push({l1, l2, from, X, e1, e2});
+          placed = true; break;
+        }
+        if (!placed) { ok = false; break; }
+      }
+      if (!ok) {
+        for (const {l1, l2, from, X, e1, e2} of plan) {
+          const s1 = sideOf(l1, from); s1.splice(s1.indexOf(e1), 1);
+          const s2 = sideOf(l2, X); s2.splice(s2.indexOf(e2), 1);
+          addDep(l1.id, l2.id, -1);
+        }
+        t.dead = false;
+      } else {
+        for (const {l1, l2} of plan) { l1.pinned = true; l2.pinned = true; }
+      }
+    }
+    trades = trades.filter(t => !t.dead);
+  }
+
+  // execution order: dependencies first, then highest OVR first
+  const top = t => Math.max(0, ...t.ab.map(m => m.ovr), ...t.ba.map(m => m.ovr));
+  const indeg = new Map(trades.map(t => [t.id, 0]));
+  for (const [x, mm] of deps) if (indeg.has(x)) for (const [y] of mm) if (indeg.has(y)) indeg.set(y, indeg.get(y) + 1);
+  const byId = new Map(trades.map(t => [t.id, t]));
+  const ready = trades.filter(t => indeg.get(t.id) === 0);
+  const out = [];
+  while (ready.length) {
+    ready.sort((x, y) => top(y) - top(x) || x.a.localeCompare(y.a) || x.b.localeCompare(y.b));
+    const t = ready.shift(); out.push(t);
+    for (const [y] of (deps.get(t.id) || new Map())) { if (!indeg.has(y)) continue; indeg.set(y, indeg.get(y) - 1); if (indeg.get(y) === 0) ready.push(byId.get(y)); }
+  }
+  out.forEach((t, i) => { t.step = i + 1; t.ab.sort(byOvr); t.ba.sort(byOvr); t.sig = tradeSig(t); });
+  return {trades: out, directCount, moves, stay, unknown};
+}
+
+function tradePlayerLabel(m) {
+  const via = m.hop === 1 ? ` — passes through, goes on to ${team(m.to).name} in Trade ${m.next.step}`
+            : m.hop === 2 ? ` — from ${team(m.from).name}, arrives in Trade ${m.prev.step}` : '';
+  return `${m.name} (${m.pos} ${m.ovr})${via}`;
+}
+function tradeScriptText(plan, list) {
+  const lines = [`MONEY MOVES NHL 27 — TRADE SCRIPT (${list.length} trades)`, ''];
+  for (const t of list) {
+    lines.push(`Trade ${t.step}: ${team(t.a).name} ⇄ ${team(t.b).name}`);
+    lines.push(`  ${team(t.a).name} send: ${t.ab.length ? t.ab.map(tradePlayerLabel).join('; ') : 'nothing'}`);
+    lines.push(`  ${team(t.b).name} send: ${t.ba.length ? t.ba.map(tradePlayerLabel).join('; ') : 'nothing'}`);
+    lines.push('');
+  }
+  if (plan.unknown.length) { lines.push('NOT ON AN NHL TEAM (sign / move manually):'); plan.unknown.forEach(m => lines.push(`  ${m.name} (${m.pos} ${m.ovr}) → ${team(m.to).name}`)); }
+  return lines.join('\n');
+}
+async function copyText(txt) {
+  try { await navigator.clipboard.writeText(txt); return true; } catch (e) {}
+  const ta = document.createElement('textarea'); ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  let ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+  ta.remove(); return ok;
+}
+function downloadText(txt, name) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([txt], {type: 'text/plain'}));
+  a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+let _lastPlan = null;
+function currentTradeList(plan) {
+  return UI.tradeTeam ? plan.trades.filter(t => t.a === UI.tradeTeam || t.b === UI.tradeTeam) : plan.trades;
+}
+function renderTrades() {
+  const plan = buildTradePlan(UI.tradeRoute !== false);
+  _lastPlan = plan;
+  const done = S.tradeDone || {};
+  const list = currentTradeList(plan);
+  const nDone = plan.trades.filter(t => done[t.sig]).length;
+  const commish = ROLE.type === 'commish';
+  const optTeams = TEAM_ABBRS.slice().sort((a, b) => team(a).name.localeCompare(team(b).name)).map(a => `<option value="${a}" ${UI.tradeTeam === a ? 'selected' : ''}>${esc(team(a).name)}</option>`).join('');
+  let h = `<div class="tstats">
+      <div><b>${plan.trades.length}</b><span>trades${UI.tradeRoute !== false && plan.directCount !== plan.trades.length ? ` <em>(${plan.directCount} direct-only)</em>` : ''}</span></div>
+      <div><b>${plan.moves.length}</b><span>players moving</span></div>
+      <div><b>${plan.stay.length}</b><span>already on team</span></div>
+      <div><b>${nDone}/${plan.trades.length}</b><span>done</span></div></div>
+    <div class="filters">
+      <label class="row" style="gap:6px">Team <select id="fTradeTeam"><option value="">All teams</option>${optTeams}</select></label>
+      <label class="row" style="gap:5px" title="Lets a player ride through a third team when that removes a whole trade"><input type="checkbox" id="fTradeRoute" ${UI.tradeRoute !== false ? 'checked' : ''}> 2-step routing (fewer trades)</label>
+      <span style="flex:1"></span>
+      <button class="sm" data-act="tcopy">Copy script</button><button class="sm" data-act="tdl">Download .txt</button>
+    </div>`;
+  if (!Object.keys(S.picks).length) return h + '<div class="empty">No picks yet — the trade script builds itself from the draft results.</div>';
+  if (plan.unknown.length) h += `<div class="note warn" style="margin-bottom:10px"><b>${plan.unknown.length} player(s) not matched to an NHL team</b> (free agents or an unrecognized team name) — sign or move these manually: ${plan.unknown.map(m => `${esc(m.name)} → ${esc(team(m.to).name)}`).join(', ')}</div>`;
+  if (!list.length) return h + '<div class="empty">No trades needed for this team.</div>';
+  h += '<div class="tlist">';
+  for (const t of list) {
+    const isDone = !!done[t.sig];
+    const side = (arr) => arr.length ? arr.map(m => `<li>${posTag(m.pos)}<span class="nm">${esc(m.name)}${m.hop === 1 ? `<small>passes through → ${esc(team(m.to).name)} in Trade ${m.next.step}</small>` : m.hop === 2 ? `<small>from ${esc(team(m.from).name)}, arrives in Trade ${m.prev.step}</small>` : ''}</span><span class="ovr ${tier(m.ovr)}">${m.ovr}</span></li>`).join('') : '<li class="mut">Nothing</li>';
+    h += `<div class="trade ${isDone ? 'done' : ''}">
+      <div class="trh"><span class="tstep">${t.step}</span><b>${esc(team(t.a).name)} ⇄ ${esc(team(t.b).name)}</b><span class="mut" style="font-size:12px">${t.ab.length} for ${t.ba.length}</span><span style="flex:1"></span>
+        ${commish ? `<button class="sm ${isDone ? 'pri' : ''}" data-act="tdone" data-sig="${t.sig}">${isDone ? '✓ Done' : 'Mark done'}</button>` : (isDone ? '<span class="chip done">Done</span>' : '')}</div>
+      <div class="tcols"><div><div class="tlbl">${esc(team(t.a).name)} send → ${esc(team(t.b).name)}</div><ul>${side(t.ab)}</ul></div>
+        <div><div class="tlbl">${esc(team(t.b).name)} send → ${esc(team(t.a).name)}</div><ul>${side(t.ba)}</ul></div></div></div>`;
+  }
+  return h + '</div>';
+}
+async function toggleTradeDone(sig) {
+  S.tradeDone = S.tradeDone || {};
+  const on = !S.tradeDone[sig];
+  if (on) S.tradeDone[sig] = true; else delete S.tradeDone[sig];
+  render(true);
+  try { await fbPatch({[`tradeDone/${sig}`]: on ? true : null}); } catch (e) { toast('Save failed', 'err'); }
+}
+
+/* =====================================================================
+   RENDER
+   ===================================================================== */
+function stateSig() {
+  return JSON.stringify([Object.keys(S.picks).length, currentPick(), S.status, S.config, S.teams, S.queues, S.tradeDone, poolVersion, POOL.length, ROLE, Object.values(S.picks).map(p => p.name).join('|')]);
+}
+function render(force = false) {
+  if (!ROLE) return;
+  renderHeader();
+  const sig = stateSig();
+  if (!force && sig === _lastSig) return;
+  _lastSig = sig;
+  renderUpNext();
+  renderLog();
+  if (!_dragging) renderTab();
+  const pc = Object.keys(S.picks).length;
+  if (pc !== _lastPickCount) { _lastPickCount = pc; }
+}
+
+function renderHeader() {
+  const st = S.status, c = cfg(), n = currentPick(), done = isComplete();
+  $('cfgWarn').classList.toggle('hidden', !/YOUR-PROJECT/.test(FB_BASE));
+  $('cbar').classList.toggle('hidden', ROLE.type !== 'commish');
+  $('meLbl').textContent = ROLE.type === 'commish' ? 'Commissioner' : ROLE.type === 'manager' ? team(ROLE.team).name : 'Spectator';
+  const chip = $('stChip');
+  if (!st.started) { chip.className = 'chip'; chip.textContent = 'Not started'; }
+  else if (done) { chip.className = 'chip done'; chip.textContent = 'Complete'; }
+  else if (st.paused) { chip.className = 'chip paused'; chip.textContent = 'Paused'; }
+  else { chip.className = 'chip live'; chip.textContent = '● Live'; }
+  if (done) { $('clkLbl').textContent = 'Draft'; $('clkTeam').textContent = 'Complete'; $('clkPick').textContent = `${totalPicks()} picks`; }
+  else {
+    const a = teamForPick(n);
+    $('clkLbl').textContent = st.started ? 'On the clock' : 'First up';
+    $('clkTeam').textContent = team(a).name + (team(a).autoPick ? ' ⚙' : '');
+    $('clkPick').textContent = pickLabel(n);
+  }
+  const mine = ROLE.type === 'manager' && st.started && !done && teamForPick(n) === ROLE.team;
+  $('ocBanner').classList.toggle('hidden', !mine);
+  document.title = mine ? '🚨 ON THE CLOCK · Money Moves' : 'Money Moves · NHL 27 Draft';
+  if (ROLE.type === 'commish') {
+    $('btnStart').disabled = !!st.started;
+    $('btnPause').disabled = !st.started || done;
+    $('btnPause').textContent = st.paused ? 'Resume' : 'Pause';
+    $('btnPause').className = st.paused ? 'pri' : '';
+    $('btnUndo').disabled = Object.keys(S.picks).length === 0;
+    $('btnAutoNow').disabled = !st.started || done;
+    $('chkExpire').checked = c.autoPickOnExpire;
+  }
+  tickTimer();
+}
+
+function renderUpNext() {
+  const n = currentPick(), T = totalPicks();
+  $('pickCount').textContent = `${Math.min(n, T)}/${T}`;
+  const labels = ['On clock', 'On deck', 'In hole'];
+  const commish = ROLE.type === 'commish';
+  let h = '';
+  for (let k = n; k < Math.min(T, n + 18); k++) {
+    const a = teamForPick(k), t = team(a), i = k - n;
+    const ab = commish
+      ? `<button class="autob ${t.autoPick ? 'on' : ''}" data-act="auto" data-team="${a}" title="Toggle auto-pick">AUTO</button>`
+      : (t.autoPick ? '<span class="autob on">AUTO</span>' : '');
+    h += `<li class="${i === 0 && S.status.started ? 'cur' : ''}"><span class="slot">${labels[i] || ''}</span><span class="t">${esc(t.name)}</span>${ab}<span class="n">${pickLabel(k)}</span></li>`;
+  }
+  $('upNext').innerHTML = h || '<li class="mut">Draft complete</li>';
+}
+
+function renderLog() {
+  const ns = Object.keys(S.picks).map(Number).sort((a, b) => b - a);
+  $('logCount').textContent = ns.length ? `${ns.length}` : '';
+  const canRepost = ROLE.type === 'commish' && !!cfg().discordWebhook;
+  $('pickLog').innerHTML = ns.map(n => {
+    const p = S.picks[n];
+    const time = typeof p.ts === 'number' ? new Date(p.ts).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}) : '';
+    return `<li><div class="top"><span>${pickLabel(n)}</span><span>${time}</span></div>
+      <div class="tm">${esc(team(p.team).name)}</div>
+      <div class="mid">${posTag(p.pos)}<span class="nm">${esc(p.name)}</span><span class="ovr ${tier(p.ovr)}">${esc(p.ovr)}</span>
+      ${canRepost ? `<button class="sm" data-act="repost" data-n="${n}" title="Repost to Discord">↗ Discord</button>` : ''}</div>
+      ${String(p.by || '').startsWith('auto') ? `<div class="by">⚙ ${p.by === 'auto-timer' ? 'auto-pick (timer)' : 'auto-pick'}</div>` : p.by === 'commish' ? '<div class="by">picked by commish</div>' : ''}</li>`;
+  }).join('') || '<li class="mut" style="border:none">No picks yet</li>';
+}
+
+function renderTab() {
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === UI.tab));
+  const qt = myQueueTeam();
+  $('qCnt').textContent = qt ? String(getQueue(qt).filter(x => !isDrafted(x)).length || '') : '';
+  const body = $('tabBody');
+  const keepScroll = body.querySelector('.tblwrap, .board');
+  const top = keepScroll ? keepScroll.scrollTop : 0, left = keepScroll ? keepScroll.scrollLeft : 0;
+  if (UI.tab === 'players') body.innerHTML = renderPlayers();
+  else if (UI.tab === 'board') body.innerHTML = renderBoard();
+  else if (UI.tab === 'teams') body.innerHTML = renderTeams();
+  else if (UI.tab === 'queue') body.innerHTML = renderQueue();
+  else if (UI.tab === 'trades') body.innerHTML = renderTrades();
+  else body.innerHTML = renderLeague();
+  const sc = body.querySelector('.tblwrap, .board');
+  if (sc) { sc.scrollTop = top; sc.scrollLeft = left; }
+  const s = $('fSearch');
+  if (s && document.activeElement !== s && UI._searchFocus) { s.focus(); s.setSelectionRange(s.value.length, s.value.length); }
+}
+
+function teamSelector() {
+  if (ROLE.type !== 'commish') return '';
+  return `<label class="row" style="gap:6px">Acting team <select id="fViewTeam"><option value="">On the clock</option>${cfg().order.map(a => `<option value="${a}" ${UI.viewTeam === a ? 'selected' : ''}>${esc(team(a).name)}</option>`).join('')}</select></label>`;
+}
+
+function renderPlayers() {
+  if (!POOL.length) return `<div class="empty">No player pool loaded yet.${ROLE.type === 'commish' ? ' Use <b>Player Pool</b> in the commissioner bar to import a CSV or generate placeholder players.' : ' Waiting on the commissioner.'}</div>`;
+  const taken = draftedKeys();
+  const qt = myQueueTeam();
+  const qset = new Set(qt ? getQueue(qt).map(key) : []);
+  const canPick = canPickNow();
+  const pickTeam = S.status.started && !isComplete() ? teamForPick(currentPick()) : null;
+  const fitTeam = ROLE.type === 'manager' ? ROLE.team : qt;
+  const s = key(UI.search);
+  let rows = POOL.filter(p => {
+    const ps = playerPositions(p);
+    if (UI.pos === 'SK' && ps.includes('G')) return false;
+    if (UI.pos !== 'ALL' && UI.pos !== 'SK' && !ps.includes(UI.pos)) return false;
+    if (UI.hideDrafted && taken.has(key(p.name))) return false;
+    if (s && !key(p.name).includes(s) && !key(p.team).includes(s)) return false;
+    if (UI.fitsOnly && fitTeam && !openSlotFor(fitTeam, p)) return false;
+    return true;
+  });
+  const goalieView = UI.pos === 'G';
+  const skaterView = ['SK','C','LW','RW','D'].includes(UI.pos);
+  const heads = goalieView ? GOALIE_ATTRS.map(x => x[1]) : skaterView ? SKATER_ATTRS.map(x => x[1]) : ['SPD','SHT/REF','PAS/HND','DEF/POS','PHY/REB'];
+  const sk = UI.sortKey, dir = UI.sortDir;
+  const val = (p, k) => {
+    if (k === 'name' || k === 'team' || k === 'pos') return String(p[k] || '').toLowerCase();
+    if (k.startsWith('a')) { const i = +k.slice(1); return +(isGoalie(p) ? p[GOALIE_ATTRS[i][0]] : p[SKATER_ATTRS[i][0]]) || 0; }
+    return +p[k] || 0;
+  };
+  rows.sort((a, b) => { const x = val(a, sk), y = val(b, sk); return (x < y ? -1 : x > y ? 1 : 0) * dir || (+b.ovr - +a.ovr); });
+  const LIMIT = 400, shown = rows.slice(0, LIMIT);
+  const th = (k, l, cls = '') => `<th class="${cls} ${sk === k ? 'sorted' : ''}" data-sort="${k}">${l}${sk === k ? (dir < 0 ? ' ▾' : ' ▴') : ''}</th>`;
+  const segBtns = [['ALL','All'],['SK','Skaters'],['C','C'],['LW','LW'],['RW','RW'],['D','D'],['G','G']]
+    .map(([v, l]) => `<button data-pos="${v}" class="${UI.pos === v ? 'on' : ''}">${l}</button>`).join('');
+  let h = `<div class="filters">
+    <div class="seg">${segBtns}</div>
+    <input id="fSearch" placeholder="Search player or NHL team" value="${esc(UI.search)}" style="flex:1;min-width:160px">
+    <label class="row" style="gap:5px"><input type="checkbox" id="fHide" ${UI.hideDrafted ? 'checked' : ''}> Hide drafted</label>
+    ${fitTeam ? `<label class="row" style="gap:5px"><input type="checkbox" id="fFits" ${UI.fitsOnly ? 'checked' : ''}> Fits ${esc(fitTeam)} roster</label>` : ''}
+    ${teamSelector()}
+  </div>
+  <div class="tblwrap"><table><thead><tr>
+    ${qt ? '<th></th>' : ''}${th('name','PLAYER')}${th('team','TEAM')}${th('pos','POS')}${th('ovr','OVR','num')}
+    ${heads.map((l, i) => th('a' + i, l, 'num')).join('')}${canPick ? '<th></th>' : ''}
+  </tr></thead><tbody>`;
+  for (const p of shown) {
+    const tk = taken.has(key(p.name));
+    const g = isGoalie(p);
+    const attrs = (g ? GOALIE_ATTRS : SKATER_ATTRS).map(([k]) => { const v = p[k]; return `<td class="num"><span class="v ${tier(+v || 0)}">${v ?? ''}</span></td>`; }).join('');
+    const fits = pickTeam ? !!openSlotFor(pickTeam, p) : true;
+    h += `<tr class="${tk ? 'taken' : ''}">
+      ${qt ? `<td><button class="star ${qset.has(key(p.name)) ? 'on' : ''}" data-act="q" data-name="${esc(p.name)}" title="Queue">${qset.has(key(p.name)) ? '★' : '☆'}</button></td>` : ''}
+      <td class="nm">${esc(p.name)}</td><td class="mut">${esc(p.team)}</td>
+      <td>${playerPositions(p).map(posTag).join(' ')}</td>
+      <td class="num"><span class="ovr ${tier(+p.ovr)}">${esc(p.ovr)}</span></td>${attrs}
+      ${canPick ? `<td>${tk ? '' : `<button class="sm ${fits ? 'pri' : ''}" data-act="draft" data-name="${esc(p.name)}" ${!fits && ROLE.type !== 'commish' ? 'disabled title="No open slot"' : ''}>Draft</button>`}</td>` : ''}
+    </tr>`;
+  }
+  h += `</tbody></table></div><div class="mut" style="font-size:12px;margin-top:6px">${rows.length} players${rows.length > LIMIT ? ` (showing top ${LIMIT} — narrow with filters)` : ''}</div>`;
+  return h;
+}
+
+function boardCellIndex(r, col) {
+  const c = cfg(), N = c.order.length;
+  return (c.draftType === 'snake' && r % 2 === 1) ? r * N + (N - 1 - col) : r * N + col;
+}
+function renderBoard() {
+  const c = cfg(), N = c.order.length, cur = S.status.started ? currentPick() : -1;
+  const seg = `<div class="filters"><div class="seg">
+    <button data-bview="grid" class="${UI.boardView === 'grid' ? 'on' : ''}">By Round</button>
+    <button data-bview="team" class="${UI.boardView === 'team' ? 'on' : ''}">By Team</button></div>
+    <span class="mut" style="font-size:12px">${c.draftType === 'snake' ? 'Snake' : 'Linear'} · ${c.rounds} rounds · ${N} teams</span></div>`;
+  if (UI.boardView === 'team') return seg + renderTeams(true);
+  let h = `${seg}<div class="board"><div class="bgrid" style="grid-template-columns:40px repeat(${N},minmax(104px,1fr))"><div class="bh">RD</div>`;
+  for (const a of c.order) h += `<div class="bh" title="${esc(team(a).name)}">${a}<small>${esc(team(a).name)}</small></div>`;
+  for (let r = 0; r < c.rounds; r++) {
+    h += `<div class="br">${r + 1}${c.draftType === 'snake' ? (r % 2 ? ' ←' : ' →') : ''}</div>`;
+    for (let col = 0; col < N; col++) {
+      const n = boardCellIndex(r, col), p = S.picks[n];
+      if (p) h += `<div class="bc bp${esc(p.pos)} ${String(p.by || '').startsWith('auto') ? 'auto' : ''}" title="${esc(p.name)} · ${esc(p.pos)} ${esc(p.ovr)}"><div class="pn">${pickLabel(n)}</div><div class="pl">${esc(p.name)}</div><div class="ps">${esc(p.pos)} · ${esc(p.ovr)}</div></div>`;
+      else h += `<div class="bc ${n === cur ? 'cur' : ''}"><div class="pn">${pickLabel(n)}</div>${n === cur ? '<div class="ps" style="color:var(--grn)">ON THE CLOCK</div>' : ''}</div>`;
+    }
+  }
+  return h + '</div></div>';
+}
+
+function renderTeams(embedded = false) {
+  const c = cfg(), cur = S.status.started && !isComplete() ? teamForPick(currentPick()) : null;
+  let h = embedded ? '' : '<div class="filters"><span class="mut" style="font-size:12px">Rosters in round-1 order · slot usage vs. caps</span></div>';
+  h += '<div class="tgrid">';
+  for (const a of c.order) {
+    const t = team(a), picks = teamPicks(a), cnt = teamCounts(a);
+    const meters = POSITIONS.map(p => `<span class="meter ${(cnt[p] || 0) >= c.limits[p] ? 'full' : ''}">${p} ${cnt[p] || 0}/${c.limits[p]}</span>`).join('');
+    const avg = picks.length ? (picks.reduce((s, p) => s + (+p.ovr || 0), 0) / picks.length).toFixed(1) : '—';
+    h += `<div class="tcard ${a === cur ? 'oc' : ''}"><div class="hd"><b>${esc(t.name)}</b><span class="row" style="gap:4px">${t.autoPick ? '<span class="autob on">AUTO</span>' : ''}<span class="mono mut" style="font-size:11px">avg ${avg}</span></span></div>
+      <div class="meters">${meters}</div><ul>${picks.map(p => `<li>${posTag(p.pos)}<span class="nm">${esc(p.name)}</span><span class="ovr ${tier(p.ovr)}">${esc(p.ovr)}</span></li>`).join('') || '<li class="mut">No picks</li>'}</ul></div>`;
+  }
+  return h + '</div>';
+}
+
+function renderQueue() {
+  const abbr = myQueueTeam();
+  if (!abbr) return '<div class="empty">Log in as a manager to build a draft queue.</div>';
+  const q = getQueue(abbr);
+  const taken = draftedKeys();
+  const t = team(abbr);
+  let h = `<div class="filters"><b style="font-family:var(--cond);font-size:18px">${esc(t.name)} queue</b>${teamSelector()}
+    <span class="mut" style="font-size:12px;flex:1">Drag to reorder. Auto-pick takes the first available queued player that fits an open slot, then best available OVR.</span>
+    ${q.some(n => taken.has(key(n))) ? '<button class="sm" data-act="qclean">Clear drafted</button>' : ''}
+    ${q.length ? '<button class="sm danger" data-act="qclear">Clear all</button>' : ''}</div>`;
+  if (!q.length) return h + '<div class="empty">Queue is empty. Star (☆) players in the Players tab to add them.</div>';
+  h += '<ul class="qlist" id="qlist">';
+  q.forEach((name, i) => {
+    const p = POOL_BY_KEY.get(key(name));
+    const gone = taken.has(key(name));
+    const fits = p && !gone ? !!openSlotFor(abbr, p) : false;
+    h += `<li draggable="true" data-i="${i}" class="${gone ? 'gone' : ''}">
+      <span class="grip">⋮⋮</span><span class="rk">${i + 1}</span>
+      ${p ? playerPositions(p).map(posTag).join(' ') : '<span class="pos">?</span>'}
+      <span class="nm">${esc(name)}${!p ? ' <span class="mut" style="font-size:11px">(not in pool)</span>' : ''}${p && !gone && !fits ? ' <span class="mut" style="font-size:11px">(no open slot)</span>' : ''}</span>
+      ${p ? `<span class="ovr ${tier(+p.ovr)}">${esc(p.ovr)}</span>` : ''}
+      <button class="sm" data-act="qup" data-i="${i}" ${i === 0 ? 'disabled' : ''}>▲</button>
+      <button class="sm" data-act="qdn" data-i="${i}" ${i === q.length - 1 ? 'disabled' : ''}>▼</button>
+      <button class="sm" data-act="qrm" data-i="${i}">✕</button></li>`;
+  });
+  return h + '</ul>';
+}
+
+function renderLeague() {
+  const c = cfg();
+  const pot = c.order.reduce((s, a) => s + (+team(a).fee || 0), 0);
+  const prizeTotal = PRIZES.reduce((s, p) => s + p[1], 0);
+  let h = `<div class="row" style="align-items:flex-start;gap:16px">
+    <div class="card" style="padding:14px;flex:1;min-width:260px"><h3 style="padding:0 0 8px;border:none">Prize Pool</h3>
+      <div class="prizes">${PRIZES.map(([l, v]) => `<span>${l}</span><span>$${v}</span>`).join('')}<span style="border-top:1px solid var(--line);padding-top:4px"><b>Total payout</b></span><span style="border-top:1px solid var(--line);padding-top:4px"><b>$${prizeTotal}</b></span></div>
+      <div class="note ${pot === prizeTotal ? '' : 'warn'}" style="margin-top:10px">Entry fees collected: <b class="mono">$${pot}</b> ${pot === prizeTotal ? '✓ matches payouts' : `· payouts total $${prizeTotal}`}</div></div>
+    <div class="card" style="padding:14px;flex:1;min-width:260px"><h3 style="padding:0 0 8px;border:none">Draft Rules</h3>
+      <div class="prizes"><span>Format</span><span>${c.draftType === 'snake' ? 'Snake' : 'Linear'}</span><span>Rounds</span><span>${c.rounds}</span>
+      <span>Pick clock</span><span>${c.timerSecs ? fmtTime(c.timerSecs * 1000) : 'None'}</span>
+      ${POSITIONS.map(p => `<span>${p} cap</span><span>${c.limits[p]}</span>`).join('')}
+      <span>Roster size</span><span>${c.rosterSize}</span><span>Auto-pick on expiry</span><span>${c.autoPickOnExpire ? 'On' : 'Off'}</span></div></div></div>
+    <div class="tblwrap" style="margin-top:14px;max-height:none"><table><thead><tr><th>#</th><th>TEAM</th><th class="num">ENTRY FEE</th><th class="num">PICKS</th><th class="num">AUTO</th></tr></thead><tbody>`;
+  c.order.forEach((a, i) => { const t = team(a); h += `<tr><td class="mono">${i + 1}</td><td class="nm">${esc(t.name)}</td><td class="num mono">$${+t.fee || 0}</td><td class="num mono">${teamPicks(a).length}</td><td class="num">${t.autoPick ? '<span class="autob on">ON</span>' : ''}</td></tr>`; });
+  return h + '</tbody></table></div>';
+}
+
+/* =====================================================================
+   EVENTS
+   ===================================================================== */
+document.addEventListener('click', e => {
+  const tb = e.target.closest('#tabs button');
+  if (tb) { UI.tab = tb.dataset.tab; render(true); return; }
+  const pb = e.target.closest('[data-pos]');
+  if (pb) { UI.pos = pb.dataset.pos; if (UI.pos === 'G' && UI.sortKey.startsWith('a')) UI.sortKey = 'ovr'; render(true); return; }
+  const bv = e.target.closest('[data-bview]');
+  if (bv) { UI.boardView = bv.dataset.bview; render(true); return; }
+  const th = e.target.closest('th[data-sort]');
+  if (th) { const k = th.dataset.sort; if (UI.sortKey === k) UI.sortDir *= -1; else { UI.sortKey = k; UI.sortDir = ['name','team','pos'].includes(k) ? 1 : -1; } render(true); return; }
+  const b = e.target.closest('[data-act]');
+  if (!b) return;
+  const act = b.dataset.act;
+  const abbr = myQueueTeam();
+  if (act === 'draft') makeManualPick(b.dataset.name);
+  else if (act === 'q') toggleQueue(b.dataset.name);
+  else if (act === 'auto') { if (ROLE.type === 'commish' || (ROLE.type === 'manager' && ROLE.team === b.dataset.team)) setTeamAuto(b.dataset.team, !team(b.dataset.team).autoPick); }
+  else if (act === 'tdone') { if (ROLE.type === 'commish') toggleTradeDone(b.dataset.sig); }
+  else if (act === 'tcopy' || act === 'tdl') {
+    const plan = _lastPlan || buildTradePlan(UI.tradeRoute !== false);
+    const txt = tradeScriptText(plan, currentTradeList(plan));
+    if (act === 'tdl') downloadText(txt, 'money-moves-nhl27-trades.txt');
+    else copyText(txt).then(ok => toast(ok ? 'Trade script copied' : 'Copy blocked — use Download', ok ? 'ok' : 'err'));
+  }
+  else if (act === 'repost') postPickToDiscord(+b.dataset.n, true).then(ok => toast(ok ? 'Reposted to Discord' : 'Discord post failed', ok ? 'ok' : 'err'));
+  else if (abbr && act.startsWith('q')) {
+    const q = getQueue(abbr).slice(), i = +b.dataset.i;
+    if (act === 'qup' && i > 0) { [q[i - 1], q[i]] = [q[i], q[i - 1]]; saveQueue(abbr, q); }
+    else if (act === 'qdn' && i < q.length - 1) { [q[i + 1], q[i]] = [q[i], q[i + 1]]; saveQueue(abbr, q); }
+    else if (act === 'qrm') { q.splice(i, 1); saveQueue(abbr, q); }
+    else if (act === 'qclean') { const tk = draftedKeys(); saveQueue(abbr, q.filter(n => !tk.has(key(n)))); }
+    else if (act === 'qclear' && confirm('Clear your whole queue?')) saveQueue(abbr, []);
+  }
+});
+document.addEventListener('input', e => {
+  if (e.target.id === 'fSearch') { UI.search = e.target.value; UI._searchFocus = true; render(true); }
+});
+document.addEventListener('change', e => {
+  const id = e.target.id;
+  if (id === 'fHide') { UI.hideDrafted = e.target.checked; render(true); }
+  else if (id === 'fFits') { UI.fitsOnly = e.target.checked; render(true); }
+  else if (id === 'fViewTeam') { UI.viewTeam = e.target.value; render(true); }
+  else if (id === 'chkExpire') setExpireAuto(e.target.checked);
+  else if (id === 'fTradeTeam') { UI.tradeTeam = e.target.value; render(true); }
+  else if (id === 'fTradeRoute') { UI.tradeRoute = e.target.checked; render(true); }
+});
+document.addEventListener('focusout', e => { if (e.target.id === 'fSearch') UI._searchFocus = false; });
+
+// queue drag & drop
+let _dragFrom = -1;
+document.addEventListener('dragstart', e => {
+  const li = e.target.closest && e.target.closest('#qlist li'); if (!li) return;
+  _dragging = true; _dragFrom = +li.dataset.i; li.classList.add('drag');
+  e.dataTransfer.effectAllowed = 'move';
+  try { e.dataTransfer.setData('text/plain', String(_dragFrom)); } catch (x) {}
+});
+document.addEventListener('dragover', e => {
+  const li = e.target.closest && e.target.closest('#qlist li'); if (!li || _dragFrom < 0) return;
+  e.preventDefault();
+  document.querySelectorAll('#qlist li.over').forEach(x => x.classList.remove('over'));
+  li.classList.add('over');
+});
+document.addEventListener('drop', e => {
+  const li = e.target.closest && e.target.closest('#qlist li'); if (!li || _dragFrom < 0) return;
+  e.preventDefault();
+  const to = +li.dataset.i, abbr = myQueueTeam();
+  const q = getQueue(abbr).slice();
+  const [m] = q.splice(_dragFrom, 1); q.splice(to, 0, m);
+  _dragFrom = -1; _dragging = false;
+  saveQueue(abbr, q);
+});
+document.addEventListener('dragend', () => { _dragFrom = -1; _dragging = false; render(true); });
+
+$('btnLogout').onclick = () => { saveRole(null); showLogin(); };
+$('btnStart').onclick = () => startDraft().catch(e => toast(e.message, 'err'));
+$('btnPause').onclick = () => togglePause().catch(e => toast(e.message, 'err'));
+$('btnUndo').onclick = () => undoLastPick().catch(e => toast(e.message, 'err'));
+$('btnAutoNow').onclick = () => autoPickNow().catch(e => toast(e.message, 'err'));
+$('btnSettings').onclick = () => openSettings();
+$('btnTeams').onclick = () => openTeams();
+$('btnPlayers').onclick = () => openPlayers();
+$('btnDiscord').onclick = () => openDiscord();
+$('btnReset').onclick = () => openReset();
+
+/* =====================================================================
+   MODALS
+   ===================================================================== */
+function modal(title, bodyHtml, footHtml, wide = false) {
+  $('modalRoot').innerHTML = `<div class="ov" id="ov"><div class="modal ${wide ? 'wide' : ''}"><h2>${title}<button class="sm" id="mClose">✕</button></h2><div class="bd">${bodyHtml}</div>${footHtml ? `<div class="ft">${footHtml}</div>` : ''}</div></div>`;
+  $('mClose').onclick = closeModal;
+  $('ov').addEventListener('mousedown', e => { if (e.target.id === 'ov') closeModal(); });
+}
+function closeModal() { $('modalRoot').innerHTML = ''; }
+
+function showLogin() {
+  const opts = TEAM_ABBRS.slice().sort((a, b) => team(a).name.localeCompare(team(b).name)).map(a => `<option value="${a}">${esc(team(a).name)}</option>`).join('');
+  $('modalRoot').innerHTML = `<div class="ov"><div class="modal login"><h2>Money Moves · NHL 27</h2><div class="bd">
+    <div class="lopts">
+      <div class="card" style="padding:12px"><b style="font-family:var(--cond);font-size:18px">Manager</b>
+        <div class="row" style="margin-top:8px"><select id="lTeam" style="flex:1">${opts}</select><input id="lPin" type="password" inputmode="numeric" placeholder="PIN" style="width:90px"></div>
+        <button class="pri" id="lMgr" style="width:100%;margin-top:8px">Enter as manager</button></div>
+      <div class="card" style="padding:12px"><b style="font-family:var(--cond);font-size:18px">Commissioner</b>
+        <div class="row" style="margin-top:8px"><input id="lPass" type="password" placeholder="Password" style="flex:1"><button id="lCom">Enter</button></div></div>
+      <button class="lopt" id="lSpec"><b>Spectator</b><span>Watch the board — no picks or queue</span></button>
+    </div><div id="lErr" style="color:var(--red);font-size:13px"></div></div></div></div>`;
+  const err = m => { $('lErr').textContent = m; };
+  $('lMgr').onclick = async () => {
+    const a = $('lTeam').value, pin = $('lPin').value.trim();
+    try { const t = await fbGet(`${DB_ROOT}/teams/${a}`); if (t) S.teams[a] = t; } catch (e) {}
+    const real = String(team(a).pin || '');
+    if (!real) return err('No PIN set for this team yet — ask the commissioner.');
+    if (pin !== real) return err('Wrong PIN.');
+    saveRole({type:'manager', team:a}); closeModal(); _lastSig = ''; render(true);
+  };
+  $('lPin').onkeydown = e => { if (e.key === 'Enter') $('lMgr').click(); };
+  $('lCom').onclick = () => {
+    if ($('lPass').value !== COMMISH_PASSWORD) return err('Wrong password.');
+    saveRole({type:'commish'}); closeModal(); _lastSig = ''; render(true); heartbeat();
+  };
+  $('lPass').onkeydown = e => { if (e.key === 'Enter') $('lCom').click(); };
+  $('lSpec').onclick = () => { saveRole({type:'spectator'}); closeModal(); _lastSig = ''; render(true); };
+}
+
+function openSettings() {
+  const c = cfg();
+  const drafted = Object.keys(S.picks).length > 0;
+  modal('Draft Settings', `
+    ${drafted ? '<div class="note warn">Picks have been made. Changing order type, rounds, or caps mid-draft reshuffles who is on the clock — be careful.</div>' : ''}
+    <div class="row">
+      <div class="field" style="flex:1"><label>Draft type</label><select id="sType"><option value="snake" ${c.draftType === 'snake' ? 'selected' : ''}>Snake</option><option value="linear" ${c.draftType === 'linear' ? 'selected' : ''}>Linear</option></select></div>
+      <div class="field" style="flex:1"><label>Pick timer</label><select id="sTimer">${TIMER_OPTIONS.map(([v, l]) => `<option value="${v}" ${c.timerSecs === v ? 'selected' : ''}>${l}</option>`).join('')}${TIMER_OPTIONS.some(o => o[0] === c.timerSecs) ? '' : `<option value="${c.timerSecs}" selected>${c.timerSecs}s</option>`}</select></div>
+      <div class="field" style="width:110px"><label>Rounds</label><input id="sRounds" type="number" min="1" max="40" value="${c.rounds}"></div>
+    </div>
+    <div class="field"><label>Roster caps per position (auto-pick and manager picks respect these)</label>
+      <div class="lims">${POSITIONS.map(p => `<div class="field"><label style="text-align:center">${p}</label><input type="number" min="0" max="20" id="sL${p}" value="${c.limits[p]}"></div>`).join('')}</div></div>
+    <div class="note" id="sNote"></div>
+    <label class="row" style="gap:6px;color:var(--txt);font-size:14px"><input type="checkbox" id="sExpire" ${c.autoPickOnExpire ? 'checked' : ''}> Auto-pick when the timer expires</label>`,
+    `<button id="sCancel">Cancel</button><button class="pri" id="sSave">Save</button>`);
+  const upd = () => { const sum = POSITIONS.reduce((s, p) => s + (+$('sL' + p).value || 0), 0); const r = +$('sRounds').value; $('sNote').textContent = `Roster size ${sum} · ${r} rounds · ${r * 32} total picks${sum !== r ? ` — rounds ≠ roster size (${r > sum ? 'extra rounds ignore caps' : 'some slots will go unfilled'})` : ''}`; };
+  POSITIONS.forEach(p => $('sL' + p).oninput = upd); $('sRounds').oninput = upd; upd();
+  $('sCancel').onclick = closeModal;
+  $('sSave').onclick = async () => {
+    const limits = {}; POSITIONS.forEach(p => limits[p] = Math.max(0, parseInt($('sL' + p).value, 10) || 0));
+    const timerSecs = parseInt($('sTimer').value, 10);
+    const exp = $('sExpire').checked;
+    if (!exp) { _autoPickFiring = false; _smartPickRunning = false; }
+    const upd = {'config/draftType': $('sType').value, 'config/timerSecs': timerSecs, 'config/rounds': Math.max(1, parseInt($('sRounds').value, 10) || 14), 'config/limits': limits, 'config/autoPickOnExpire': exp};
+    if (S.status.started && timerSecs !== cfg().timerSecs) {
+      const now = serverNow();
+      Object.assign(upd, {'status/timerPick': currentPick(), 'status/clockStart': now, 'status/timerEnd': now + timerSecs * 1000});
+      if (S.status.paused) upd['status/pausedRemaining'] = timerSecs * 1000;
+    }
+    try { await fbPatch(upd); closeModal(); await pollFirebase(); toast('Settings saved', 'ok'); } catch (e) { toast(e.message, 'err'); }
+  };
+}
+
+function openTeams() {
+  let order = cfg().order.slice();
+  const draw = () => {
+    const pot = order.reduce((s, a) => s + (+($(`tf_${a}`) ? $(`tf_${a}`).value : team(a).fee) || 0), 0);
+    return `<div class="note">Round-1 order top to bottom. Fees total <b class="mono" id="tPot">$${pot}</b> (target $485). PINs are what managers type to log in. Discord ID (numeric user ID) enables @mentions.</div>
+      <div class="row"><button class="sm" id="tRand">Randomize order</button><button class="sm" id="tPasteBtn">Paste order…</button><button class="sm" id="tPins">Fill blank PINs (random 4-digit)</button></div>
+      <div id="tPasteBox" class="hidden"><textarea id="tPaste" rows="6" placeholder="One team per line — full name or abbreviation (e.g. TOR or Toronto Maple Leafs). Order = round 1 pick order."></textarea><button class="sm pri" id="tPasteApply" style="margin-top:6px">Apply order</button></div>
+      <div class="tblwrap" style="max-height:52vh"><table class="ttbl"><thead><tr><th>#</th><th></th><th>TEAM</th><th>FEE $</th><th>PIN</th><th>DISCORD ID</th><th>AUTO</th></tr></thead><tbody>
+      ${order.map((a, i) => { const t = team(a); return `<tr><td class="mono">${i + 1}</td><td style="white-space:nowrap"><button class="sm" data-mv="-1" data-a="${a}" ${i === 0 ? 'disabled' : ''}>▲</button><button class="sm" data-mv="1" data-a="${a}" ${i === order.length - 1 ? 'disabled' : ''}>▼</button></td>
+        <td class="nm">${esc(t.name)}</td><td><input id="tf_${a}" type="number" min="0" step="5" value="${+t.fee || 0}" style="width:70px"></td>
+        <td><input id="tp_${a}" value="${esc(t.pin)}" style="width:80px"></td><td><input id="td_${a}" value="${esc(t.discordId)}" style="width:170px" placeholder="optional"></td>
+        <td><input type="checkbox" id="ta_${a}" ${t.autoPick ? 'checked' : ''}></td></tr>`; }).join('')}</tbody></table></div>`;
+  };
+  // keep unsaved edits while reordering
+  const snapshot = () => { const o = {}; for (const a of TEAM_ABBRS) if ($(`tf_${a}`)) o[a] = {fee: $(`tf_${a}`).value, pin: $(`tp_${a}`).value, discordId: $(`td_${a}`).value, autoPick: $(`ta_${a}`).checked}; return o; };
+  const restore = o => { for (const a in o) { $(`tf_${a}`).value = o[a].fee; $(`tp_${a}`).value = o[a].pin; $(`td_${a}`).value = o[a].discordId; $(`ta_${a}`).checked = o[a].autoPick; } };
+  modal('Teams & Draft Order', '<div id="tBody"></div>', `<button id="tCancel">Cancel</button><button class="pri" id="tSave">Save teams &amp; order</button>`, true);
+  const redraw = () => { const snap = snapshot(); $('tBody').innerHTML = draw(); restore(snap); bind(); recalc(); };
+  const recalc = () => { const pot = order.reduce((s, a) => s + (+$(`tf_${a}`).value || 0), 0); $('tPot').textContent = `$${pot}`; $('tPot').style.color = pot === 485 ? 'var(--grn)' : 'var(--gold)'; };
+  const bind = () => {
+    $('tBody').querySelectorAll('[data-mv]').forEach(b => b.onclick = () => { const i = order.indexOf(b.dataset.a), j = i + +b.dataset.mv; [order[i], order[j]] = [order[j], order[i]]; redraw(); });
+    $('tBody').querySelectorAll('input[id^="tf_"]').forEach(x => x.oninput = recalc);
+    $('tRand').onclick = () => { if (Object.keys(S.picks).length && !confirm('Picks exist — reshuffle anyway?')) return; for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; } redraw(); };
+    $('tPasteBtn').onclick = () => $('tPasteBox').classList.toggle('hidden');
+    $('tPins').onclick = () => { for (const a of TEAM_ABBRS) if (!$(`tp_${a}`).value.trim()) $(`tp_${a}`).value = String(1000 + Math.floor(Math.random() * 9000)); };
+    $('tPasteApply').onclick = () => {
+      const lines = $('tPaste').value.split(/\n/).map(s => s.trim()).filter(Boolean);
+      const out = [], bad = [];
+      for (const l of lines) {
+        const k = key(l).replace(/^\d+[\.\)\-\s]+/, '');
+        const a = TEAM_ABBRS.find(x => key(x) === k || key(TEAM_NAME[x]) === k || key(TEAM_FULL[x]) === k || key(TEAM_FULL[x]).normalize('NFD').replace(/[̀-ͯ]/g, '') === k);
+        if (!a || out.includes(a)) bad.push(l); else out.push(a);
+      }
+      if (bad.length || out.length !== 32) return toast(`Need all 32 teams once. Unmatched/duplicate: ${bad.join(', ') || 'none'} · matched ${out.length}`, 'err');
+      order = out; redraw(); toast('Order applied — remember to Save', 'ok');
+    };
+  };
+  $('tBody').innerHTML = draw(); bind(); recalc();
+  $('tCancel').onclick = closeModal;
+  $('tSave').onclick = async () => {
+    const upd = {'config/order': order};
+    let turnedOff = false;
+    for (const a of TEAM_ABBRS) {
+      const on = $(`ta_${a}`).checked;
+      if (team(a).autoPick && !on) turnedOff = true;
+      upd[`teams/${a}/fee`] = +$(`tf_${a}`).value || 0;
+      upd[`teams/${a}/pin`] = $(`tp_${a}`).value.trim();
+      upd[`teams/${a}/discordId`] = $(`td_${a}`).value.trim();
+      upd[`teams/${a}/autoPick`] = on;
+    }
+    if (turnedOff) { _autoPickFiring = false; _smartPickRunning = false; }
+    try { await fbPatch(upd); closeModal(); await pollFirebase(); toast('Teams saved', 'ok'); } catch (e) { toast(e.message, 'err'); }
+  };
+}
+
+/* ---------- Player pool: CSV import + placeholder generator ---------- */
+function parseCSV(text) {
+  text = text.replace(/^﻿/, '');
+  const first = text.split(/\r?\n/)[0] || '';
+  const delim = (first.match(/\t/g) || []).length > (first.match(/,/g) || []).length ? '\t' : ',';
+  const rows = []; let row = [], cell = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (q) {
+      if (ch === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; }
+      else cell += ch;
+    } else if (ch === '"') q = true;
+    else if (ch === delim) { row.push(cell); cell = ''; }
+    else if (ch === '\n' || ch === '\r') { if (ch === '\r' && text[i + 1] === '\n') i++; row.push(cell); rows.push(row); row = []; cell = ''; }
+    else cell += ch;
+  }
+  if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
+  return rows.filter(r => r.some(c => String(c).trim() !== ''));
+}
+function importPlayers(text) {
+  const rows = parseCSV(text);
+  if (rows.length < 2) throw new Error('Need a header row plus at least one player.');
+  const H = rows[0].map(h => key(h).replace(/[^a-z0-9 ]/g, '').trim());
+  const find = (...names) => H.findIndex(h => names.includes(h));
+  let iPos = H.findIndex(h => h === 'position' || h === 'pos');
+  const iGPos = H.findIndex((h, i) => i !== iPos && ['pos','positioning','gpos','goalie positioning'].includes(h));
+  const idx = {
+    name: find('name','player','player name','full name'), first: find('first','first name','firstname'), last: find('last','last name','lastname'),
+    team: find('team','nhl team','club','tm'), ovr: find('ovr','overall','rating','ovr rating'),
+    spd: find('spd','speed','skating'), sht: find('sht','shooting','shot'), pas: find('pas','passing'),
+    def: find('def','defense','defence','defending'), phy: find('phy','physical','physicality'),
+    ref: find('ref','reflexes','reflex'), hnd: find('hnd','handling','puck handling'), reb: find('reb','rebound','rebound control','rebounds'),
+    hand: find('hand','shoots','catches','handedness'), age: find('age')
+  };
+  if (iPos < 0) throw new Error('No Position/Pos column found.');
+  if (idx.name < 0 && (idx.first < 0 || idx.last < 0)) throw new Error('No Name column (or First + Last) found.');
+  if (idx.ovr < 0) throw new Error('No OVR/Overall column found.');
+  const num = v => { const n = parseFloat(String(v ?? '').replace(/[^\d.\-]/g, '')); return Number.isFinite(n) ? Math.round(n) : null; };
+  const out = [], skipped = [], seen = new Map();
+  for (const r of rows.slice(1)) {
+    const get = i => i >= 0 ? String(r[i] ?? '').trim() : '';
+    let name = idx.name >= 0 ? get(idx.name) : `${get(idx.first)} ${get(idx.last)}`.trim();
+    const posList = get(iPos).split(/[\/,|\s]+/).map(normPos).filter(Boolean);
+    if (!name || !posList.length) { skipped.push(name || '(blank)'); continue; }
+    const p = {name, team: get(idx.team), pos: [...new Set(posList)].join('/'), ovr: num(get(idx.ovr)) ?? 0};
+    const g = posList[0] === 'G';
+    const put = (k, i) => { const v = num(get(i)); if (v != null) p[k] = v; };
+    put('spd', idx.spd);
+    if (g) { put('ref', idx.ref); put('hnd', idx.hnd); put('gpos', iGPos); put('reb', idx.reb); }
+    else { put('sht', idx.sht); put('pas', idx.pas); put('def', idx.def); put('phy', idx.phy); }
+    if (get(idx.hand)) p.hand = get(idx.hand);
+    if (idx.age >= 0 && num(get(idx.age)) != null) p.age = num(get(idx.age));
+    const k = key(name);
+    if (seen.has(k)) { p.name = `${name} (${p.team || p.pos})`; }   // keep queue names unique
+    seen.set(key(p.name), true); seen.set(k, true);
+    out.push(p);
+  }
+  return {players: out, skipped};
+}
+function generatePlaceholderPool() {
+  let seed = 2027;
+  const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; };
+  const FIRST = ['Connor','Nathan','Auston','Cale','Quinn','Jack','Mitch','Matthew','Leon','Kirill','Mikko','Sebastian','Elias','Brady','Adam','Jason','Mark','Tage','Logan','Owen','Dylan','Ryan','Evan','Noah','Lucas','Mason','Liam','Jonas','Erik','Viktor','Anton','Nikita','Pavel','Oskar','Filip','Lukas','Jesper','Mats','Dawson','Wyatt','Cole','Brock','Trevor','Jake','Bo','Marco','Gabriel','Samuel','Alex','Tyler'];
+  const LAST = ['Halvorsen','Mercer','Lindqvist','Draper','Fontaine','Kowalski','Brandt','Sutter','Novak','Ellison','Rask','Varga','Holm','Pryor','Dubois','Kessler','Marchetti','Lund','Carver','Bergeron','Thibault','Okafor','Strand','Whitlock','Laine','Rowe','Petrov','Sorensen','Gaudreau','Kane','Hartley','McCallum','Ostrowski','Belanger','Kaprizov','Vachon','Eklund','Roth','Callahan','Sedlak','Murray','Lemieux','Dahl','Fischer','Brodeur','Tkachuk','Hollis','Grady','Yandle','Nyberg','Archer','Bishop','Kerr','Lafleur','Moss','Pike','Quarry','Sundin','Torres','Voss'];
+  const used = new Set(), pool = [];
+  const nm = () => { for (;;) { const n = FIRST[Math.floor(rnd() * FIRST.length)] + ' ' + LAST[Math.floor(rnd() * LAST.length)]; if (!used.has(n)) { used.add(n); return n; } } };
+  const clamp = v => Math.max(50, Math.min(99, Math.round(v)));
+  const around = (base, spread) => clamp(base + (rnd() - 0.5) * spread);
+  const profile = {C:{spd:0,sht:1,pas:3,def:-4,phy:-3}, LW:{spd:2,sht:3,pas:0,def:-7,phy:-2}, RW:{spd:2,sht:3,pas:0,def:-7,phy:-2}, D:{spd:-3,sht:-6,pas:-1,def:5,phy:3}};
+  for (const [abbr] of TEAMS) {
+    const slots = [['C',4],['LW',4],['RW',4],['D',7],['G',3]];
+    for (const [pos, k] of slots) for (let i = 0; i < k; i++) {
+      const ovr = clamp(71 + 22 * Math.pow(rnd(), 2.4) - (pos === 'G' ? 0 : 0));
+      const p = {name: nm(), team: abbr, pos, ovr};
+      if (pos === 'G') Object.assign(p, {spd: around(ovr - 8, 12), ref: around(ovr + 1, 8), hnd: around(ovr - 3, 10), gpos: around(ovr, 8), reb: around(ovr - 1, 8)});
+      else { const pr = profile[pos]; Object.assign(p, {spd: around(ovr + pr.spd, 12), sht: around(ovr + pr.sht, 12), pas: around(ovr + pr.pas, 12), def: around(ovr + pr.def, 12), phy: around(ovr + pr.phy, 14)}); }
+      if (rnd() < 0.12 && (pos === 'LW' || pos === 'RW' || pos === 'C')) p.pos = pos + '/' + (pos === 'C' ? (rnd() < .5 ? 'LW' : 'RW') : 'C');
+      pool.push(p);
+    }
+  }
+  return pool.sort((a, b) => b.ovr - a.ovr);
+}
+async function uploadPool(players) {
+  const v = Date.now().toString(36);
+  await fbPatch({players}, POOL_PATH);
+  await fbPatch({'meta/poolVersion': v, 'meta/poolCount': players.length, 'meta/poolUpdated': {'.sv':'timestamp'}});
+  setPool(players); poolVersion = v; S.meta.poolVersion = v;
+  await pollFirebase();
+}
+function openPlayers() {
+  const counts = POSITIONS.map(p => `${p} ${POOL.filter(x => playerPositions(x).includes(p)).length}`).join(' · ');
+  modal('Player Pool', `
+    <div class="note">Current pool: <b>${POOL.length}</b> players${POOL.length ? ` (${counts})` : ''}. Re-importing keeps picks and queues — both are stored by player name.</div>
+    <div class="field"><label>CSV / TSV — header row required. Columns (case-insensitive): <span class="mono">Name, Team, Pos, OVR, SPD, SHT, PAS, DEF, PHY, REF, HND, POS, REB</span>. The first Pos column is position (C, LW, RW, D, G, or multi like C/LW); a second POS column (or "Positioning") is the goalie attribute.</label>
+      <textarea id="pText" rows="9" placeholder="Name,Team,Pos,OVR,SPD,SHT,PAS,DEF,PHY,REF,HND,POS,REB&#10;Connor McDavid,EDM,C,96,97,92,96,70,78,,,,&#10;Igor Shesterkin,NYR,G,93,82,,,,,94,88,93,92"></textarea></div>
+    <div class="row"><input type="file" id="pFile" accept=".csv,.tsv,.txt"><button id="pParse">Preview import</button></div>
+    <div id="pPrev"></div>`,
+    `<button id="pGen">Generate placeholder pool (704)</button><button id="pCancel">Close</button><button class="pri" id="pUpload" disabled>Upload to Firebase</button>`);
+  let parsed = null;
+  $('pFile').onchange = e => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => { $('pText').value = r.result; $('pParse').click(); }; r.readAsText(f); };
+  $('pParse').onclick = () => {
+    try {
+      parsed = importPlayers($('pText').value);
+      const pc = POSITIONS.map(p => `${p} ${parsed.players.filter(x => playerPositions(x).includes(p)).length}`).join(' · ');
+      const drafted = Object.values(S.picks).map(p => p.name).filter(n => !parsed.players.some(x => key(x.name) === key(n)));
+      const need = POSITIONS.map(p => [p, cfg().limits[p] * 32, parsed.players.filter(x => playerPositions(x).includes(p)).length]).filter(([, n, h]) => h < n);
+      $('pPrev').innerHTML = `<div class="note">Parsed <b>${parsed.players.length}</b> players (${pc}).${parsed.skipped.length ? ` Skipped ${parsed.skipped.length} rows with no name/position.` : ''}
+        ${need.length ? `<br><span style="color:var(--gold)">Thin positions vs. caps × 32: ${need.map(([p, n, h]) => `${p} ${h}/${n}`).join(', ')}</span>` : ''}
+        ${drafted.length ? `<br><span style="color:var(--gold)">${drafted.length} already-drafted names aren't in this file — their picks stay on the board.</span>` : ''}</div>`;
+      $('pUpload').disabled = !parsed.players.length;
+    } catch (e) { parsed = null; $('pUpload').disabled = true; $('pPrev').innerHTML = `<div class="note warn">${esc(e.message)}</div>`; }
+  };
+  $('pGen').onclick = async () => {
+    if (POOL.length && !confirm('Replace the current pool with 704 placeholder players?')) return;
+    try { await uploadPool(generatePlaceholderPool()); closeModal(); toast('Placeholder pool loaded', 'ok'); } catch (e) { toast(e.message, 'err'); }
+  };
+  $('pUpload').onclick = async () => {
+    if (!parsed) return;
+    try { await uploadPool(parsed.players); closeModal(); toast(`Uploaded ${parsed.players.length} players`, 'ok'); } catch (e) { toast(e.message, 'err'); }
+  };
+  $('pCancel').onclick = closeModal;
+}
+
+function openDiscord() {
+  const c = cfg();
+  modal('Discord Settings', `
+    <div class="field"><label>Webhook URL</label><input id="dUrl" value="${esc(c.discordWebhook)}" placeholder="https://discord.com/api/webhooks/…"></div>
+    <label class="row" style="gap:6px;color:var(--txt);font-size:14px"><input type="checkbox" id="dOn" ${c.discordEnabled ? 'checked' : ''}> Post every pick automatically</label>
+    <label class="row" style="gap:6px;color:var(--txt);font-size:14px"><input type="checkbox" id="dMen" ${c.discordMentions ? 'checked' : ''}> @mention the manager on the clock (uses Discord IDs from Teams)</label>
+    <div class="note">Each pick posts the selection plus On the Clock / On Deck / In the Hole. The browser that makes the pick posts it, so it fires once. Use ↗ Discord in the pick log to repost.</div>`,
+    `<button id="dTest">Send test</button><button id="dCancel">Cancel</button><button class="pri" id="dSave">Save</button>`);
+  $('dCancel').onclick = closeModal;
+  $('dTest').onclick = async () => {
+    const url = $('dUrl').value.trim(); if (!url) return toast('Enter a webhook URL', 'err');
+    try { const r = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({content: '🏒 Money Moves NHL 27 draft app — webhook test ✅'})}); toast(r.ok ? 'Test sent' : `Discord returned ${r.status}`, r.ok ? 'ok' : 'err'); }
+    catch (e) { toast('Test failed: ' + e.message, 'err'); }
+  };
+  $('dSave').onclick = async () => {
+    try { await fbPatch({'config/discordWebhook': $('dUrl').value.trim(), 'config/discordEnabled': $('dOn').checked, 'config/discordMentions': $('dMen').checked}); closeModal(); await pollFirebase(); toast('Discord settings saved', 'ok'); }
+    catch (e) { toast(e.message, 'err'); }
+  };
+}
+
+function openReset() {
+  modal('Reset Firebase', `
+    <div class="note warn">This cannot be undone.</div>
+    <label class="row" style="gap:6px;color:var(--txt);font-size:14px"><input type="radio" name="rk" value="draft" checked> <span><b>Reset draft</b> — clear all picks and the clock. Keeps teams, order, fees, PINs, settings, Discord, and player pool.</span></label>
+    <label class="row" style="gap:6px;color:var(--txt);font-size:14px;margin-left:22px"><input type="checkbox" id="rQ"> Also clear every team's queue</label>
+    <label class="row" style="gap:6px;color:var(--txt);font-size:14px"><input type="radio" name="rk" value="all"> <span><b>Full wipe</b> — delete everything including settings, teams, and the player pool.</span></label>
+    <div class="field"><label>Type RESET to confirm</label><input id="rConf"></div>`,
+    `<button id="rCancel">Cancel</button><button class="danger" id="rGo">Reset</button>`);
+  $('rCancel').onclick = closeModal;
+  $('rGo').onclick = async () => {
+    if ($('rConf').value.trim() !== 'RESET') return toast('Type RESET to confirm', 'err');
+    const kind = document.querySelector('input[name="rk"]:checked').value;
+    _autoPickFiring = false; _smartPickRunning = false;
+    try {
+      if (kind === 'all') {
+        await fbPatch({config: null, teams: null, picks: null, queues: null, status: null, meta: null, presence: null, tradeDone: null});
+        await fbPatch({players: null}, POOL_PATH);
+        setPool([]); poolVersion = null;
+      } else {
+        const upd = {picks: null, tradeDone: null, status: {started: false, paused: false, complete: false}};
+        if ($('rQ').checked) upd.queues = null;
+        await fbPatch(upd);
+      }
+      closeModal(); await pollFirebase(); toast('Reset complete', 'ok');
+    } catch (e) { toast(e.message, 'err'); }
+  };
+}
+
+/* =====================================================================
+   BOOT
+   ===================================================================== */
+async function heartbeat() {
+  if (ROLE && ROLE.type === 'commish') { try { await fbPatch({'presence/commish': {'.sv':'timestamp'}}); } catch (e) {} }
+}
+async function boot() {
+  await syncClock();
+  await pollFirebase();
+  if (!ROLE) showLogin(); else { _lastSig = ''; render(true); }
+  setInterval(pollFirebase, POLL_MS);
+  setInterval(watchdog, WATCHDOG_MS);
+  setInterval(tickTimer, TICK_MS);
+  setInterval(heartbeat, COMMISH_HEARTBEAT_MS);
+  setInterval(syncClock, 5 * 60 * 1000);
+  heartbeat();
+}
+boot();
+</script>
+</body>
+</html>
