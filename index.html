@@ -63,7 +63,7 @@ header{position:sticky;top:0;z-index:20;background:rgba(6,11,20,.92);backdrop-fi
 
 /* layout */
 .layout{display:grid;grid-template-columns:250px minmax(0,1fr) 310px;gap:14px;padding:14px 18px}
-@media(max-width:1150px){.layout{grid-template-columns:1fr}.side{max-height:none!important}}
+
 .card{background:var(--panel);border:1px solid var(--line);border-radius:12px}
 .card h3{margin:0;padding:11px 14px;font-family:var(--cond);font-size:17px;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:8px}
 .side{max-height:calc(100vh - 150px);position:sticky;top:130px;overflow:auto}
@@ -210,6 +210,44 @@ td.nm{font-weight:600}
 .tcols li{display:flex;align-items:center;gap:7px;padding:3px 0;font-size:13px}
 .tcols li .nm{flex:1;font-weight:600}
 .tcols li small{display:block;font-weight:400;font-size:11px;color:var(--gold)}
+.mob{display:none}
+@media(max-width:1150px){
+  .layout{grid-template-columns:1fr}
+  .side{position:static;max-height:none;overflow:visible}
+  #mainCard{order:-1}
+  #logCard .log{max-height:420px;overflow:auto}
+}
+@media(max-width:760px){
+  body{font-size:15px}
+  header{position:sticky;backdrop-filter:none;background:#060b14}
+  .hrow{padding:8px 12px;gap:6px 10px}
+  .brand{font-size:17px}.brand small{font-size:10px;letter-spacing:1.5px}
+  .clock{order:3;flex-basis:100%;min-width:0;justify-content:space-between;gap:10px}
+  .clock .who{text-align:left}.clock .who .tm{font-size:21px}
+  .timer{font-size:26px;min-width:104px;padding:2px 10px}
+  .me{margin-left:auto}
+  .cbar{flex-wrap:nowrap;overflow-x:auto;padding:6px 12px;-webkit-overflow-scrolling:touch}
+  .cbar>*{flex:0 0 auto}
+  .oc-banner{font-size:15px;padding:5px}
+  .layout{padding:10px 8px;gap:10px}
+  .tabbody{padding:8px}
+  .tabs{padding:6px 4px 0}.tabs button{padding:8px 7px;font-size:13px;letter-spacing:.3px}
+  td:first-child{width:28px}
+  .filters{gap:6px}
+  .filters .seg{width:100%;display:flex}.filters .seg button{flex:1;padding:7px 0}
+  #fSearch{min-width:0;width:100%;flex-basis:100%}
+  .tblwrap,.board,.tlist{max-height:none;overflow:visible}
+  .tblwrap{overflow-x:auto;border-radius:8px}
+  th{position:static}
+  th.dsk,td.dsk,th.attr,td.attr{display:none}
+  .mob{display:flex;gap:5px;align-items:center;margin-top:2px;font-weight:400;font-size:12px}
+  td{padding:5px 6px;white-space:normal}
+  td.nm{font-size:14px}
+  .star{font-size:20px;padding:0 2px}
+  .board{overflow-x:auto}
+  .modal{max-width:100%}
+  .lims{grid-template-columns:repeat(5,minmax(0,1fr))}
+}
 .cfgwarn{background:#3a141b;color:#ffb3bb;text-align:center;padding:8px;font-weight:600;font-size:13px}
 </style>
 </head>
@@ -259,7 +297,7 @@ td.nm{font-weight:600}
     <ul class="un" id="upNext"></ul>
   </aside>
 
-  <section class="card" style="min-width:0">
+  <section class="card" id="mainCard" style="min-width:0">
     <div class="tabs" id="tabs">
       <button data-tab="players" class="on">Players</button>
       <button data-tab="board">Draft Board</button>
@@ -271,7 +309,7 @@ td.nm{font-weight:600}
     <div class="tabbody" id="tabBody"></div>
   </section>
 
-  <aside class="card side">
+  <aside class="card side" id="logCard">
     <h3>Pick Log <span class="mono mut" style="font-size:12px" id="logCount"></span></h3>
     <ul class="log" id="pickLog"></ul>
   </aside>
@@ -285,7 +323,7 @@ td.nm{font-weight:600}
 /* =====================================================================
    CONFIG — edit these
    ===================================================================== */
-const FIREBASE_URL = 'https://money-moves-nhl-default-rtdb.firebaseio.com/';
+const FIREBASE_URL = 'https://money-moves-nhl-default-rtdb.firebaseio.com';
 const DB_ROOT = 'moneymoves_nhl27';            // all draft state lives here
 const POOL_PATH = DB_ROOT + '_pool';            // player pool kept separate so the 3s poll stays light
 const COMMISH_PASSWORD = 'moneymoves';         // change before sharing the link
@@ -354,6 +392,7 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 const key = s => String(s ?? '').trim().toLowerCase();
 const serverNow = () => Date.now() + clockOffset;
 const tier = v => v >= 90 ? 't4' : v >= 85 ? 't3' : v >= 78 ? 't2' : 't1';
+const IS_PHONE = () => window.matchMedia('(max-width: 760px)').matches;
 const posTag = p => `<span class="pos pos-${esc(p)}">${esc(p)}</span>`;
 
 function loadRole() {
@@ -1137,7 +1176,7 @@ function renderUpNext() {
   const labels = ['On clock', 'On deck', 'In hole'];
   const commish = ROLE.type === 'commish';
   let h = '';
-  for (let k = n; k < Math.min(T, n + 18); k++) {
+  for (let k = n; k < Math.min(T, n + (IS_PHONE() ? 5 : 18)); k++) {
     const a = teamForPick(k), t = team(a), i = k - n;
     const ab = commish
       ? `<button class="autob ${t.autoPick ? 'on' : ''}" data-act="auto" data-team="${a}" title="Toggle auto-pick">AUTO</button>`
@@ -1214,7 +1253,7 @@ function renderPlayers() {
     return +p[k] || 0;
   };
   rows.sort((a, b) => { const x = val(a, sk), y = val(b, sk); return (x < y ? -1 : x > y ? 1 : 0) * dir || (+b.ovr - +a.ovr); });
-  const LIMIT = 400, shown = rows.slice(0, LIMIT);
+  const LIMIT = IS_PHONE() ? 150 : 400, shown = rows.slice(0, LIMIT);
   const th = (k, l, cls = '') => `<th class="${cls} ${sk === k ? 'sorted' : ''}" data-sort="${k}">${l}${sk === k ? (dir < 0 ? ' ▾' : ' ▴') : ''}</th>`;
   const segBtns = [['ALL','All'],['SK','Skaters'],['C','C'],['LW','LW'],['RW','RW'],['D','D'],['G','G']]
     .map(([v, l]) => `<button data-pos="${v}" class="${UI.pos === v ? 'on' : ''}">${l}</button>`).join('');
@@ -1226,18 +1265,18 @@ function renderPlayers() {
     ${teamSelector()}
   </div>
   <div class="tblwrap"><table><thead><tr>
-    ${qt ? '<th></th>' : ''}${th('name','PLAYER')}${th('team','TEAM')}${th('pos','POS')}${th('ovr','OVR','num')}
-    ${heads.map((l, i) => th('a' + i, l, 'num')).join('')}${canPick ? '<th></th>' : ''}
+    ${qt ? '<th></th>' : ''}${th('name','PLAYER')}${th('team','TEAM','dsk')}${th('pos','POS','dsk')}${th('ovr','OVR','num')}
+    ${heads.map((l, i) => th('a' + i, l, 'num attr')).join('')}${canPick ? '<th></th>' : ''}
   </tr></thead><tbody>`;
   for (const p of shown) {
     const tk = taken.has(key(p.name));
     const g = isGoalie(p);
-    const attrs = (g ? GOALIE_ATTRS : SKATER_ATTRS).map(([k]) => { const v = p[k]; return `<td class="num"><span class="v ${tier(+v || 0)}">${v ?? ''}</span></td>`; }).join('');
+    const attrs = (g ? GOALIE_ATTRS : SKATER_ATTRS).map(([k]) => { const v = p[k]; return `<td class="num attr"><span class="v ${tier(+v || 0)}">${v ?? ''}</span></td>`; }).join('');
     const fits = pickTeam ? !!openSlotFor(pickTeam, p) : true;
     h += `<tr class="${tk ? 'taken' : ''}">
       ${qt ? `<td><button class="star ${qset.has(key(p.name)) ? 'on' : ''}" data-act="q" data-name="${esc(p.name)}" title="Queue">${qset.has(key(p.name)) ? '★' : '☆'}</button></td>` : ''}
-      <td class="nm">${esc(p.name)}</td><td class="mut">${esc(p.team)}</td>
-      <td>${playerPositions(p).map(posTag).join(' ')}</td>
+      <td class="nm">${esc(p.name)}<div class="mob">${playerPositions(p).map(posTag).join(' ')} <span class="mut">${esc(p.team)}</span></div></td><td class="mut dsk">${esc(p.team)}</td>
+      <td class="dsk">${playerPositions(p).map(posTag).join(' ')}</td>
       <td class="num"><span class="ovr ${tier(+p.ovr)}">${esc(p.ovr)}</span></td>${attrs}
       ${canPick ? `<td>${tk ? '' : `<button class="sm ${fits ? 'pri' : ''}" data-act="draft" data-name="${esc(p.name)}" ${!fits && ROLE.type !== 'commish' ? 'disabled title="No open slot"' : ''}>Draft</button>`}</td>` : ''}
     </tr>`;
@@ -1720,6 +1759,8 @@ function openReset() {
 async function heartbeat() {
   if (ROLE && ROLE.type === 'commish') { try { await fbPatch({'presence/commish': {'.sv':'timestamp'}}); } catch (e) {} }
 }
+let _wasPhone = IS_PHONE();
+window.addEventListener('resize', () => { const ph = IS_PHONE(); if (ph !== _wasPhone) { _wasPhone = ph; _lastSig = ''; render(true); } });
 async function boot() {
   await syncClock();
   await pollFirebase();
